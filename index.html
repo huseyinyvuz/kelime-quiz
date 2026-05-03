@@ -1,0 +1,595 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#6c63ff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kelime">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Kelime Ogren</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --card2: #22263a;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --green: #43e97b;
+    --red: #ff4d6d;
+    --yellow: #ffd166;
+    --text: #e8eaf6;
+    --muted: #8b8fa8;
+    --border: #2e3250;
+    --radius: 18px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    min-height: 100%;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: max(16px, env(safe-area-inset-top)) 12px max(40px, env(safe-area-inset-bottom));
+    overflow-x: hidden;
+  }
+
+  button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+
+  h1 { font-size: 1.5rem; font-weight: 900; color: #fff; margin-bottom: 4px; text-align:center; }
+  .subtitle { font-size: 0.78rem; color: var(--muted); margin-bottom: 18px; text-align: center; }
+
+  .tabs {
+    display: flex; gap: 8px;
+    width: 100%; max-width: 480px; margin-bottom: 16px;
+  }
+  .tab {
+    flex: 1; padding: 9px 4px; border-radius: 12px;
+    background: var(--card); border: 1.5px solid var(--border);
+    color: var(--muted); font-family: 'Nunito', sans-serif;
+    font-size: 0.78rem; font-weight: 700; cursor: pointer;
+    transition: all 0.2s; text-align: center; min-height:44px;
+  }
+  .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  #app { width: 100%; max-width: 480px; }
+
+  /* PROGRESS */
+  .progress-label {
+    font-size: 0.72rem; color: var(--muted); margin-bottom: 8px;
+    display: flex; justify-content: space-between;
+  }
+  .progress-bar-wrap {
+    background: var(--border); border-radius: 99px; height: 6px;
+    margin-bottom: 14px; overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px; transition: width 0.4s ease;
+  }
+
+  /* QUIZ CARD - shows the English word */
+  .quiz-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 20px 22px;
+    text-align: center;
+    margin-bottom: 14px;
+    animation: fadeUp 0.3s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .word-type-badge {
+    font-size: 0.65rem; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; padding: 3px 10px; border-radius: 99px;
+    margin-bottom: 12px; display: inline-block;
+  }
+  .badge-V    { background:#1a2e4a; color:#5ba4ff; }
+  .badge-N    { background:#1e2e1e; color:#43e97b; }
+  .badge-Adj  { background:#2e1a2e; color:#da84da; }
+  .badge-Adv  { background:#2e2218; color:var(--yellow); }
+  .badge-Expr { background:#2e1e1e; color:var(--accent2); }
+
+  .quiz-word {
+    font-family: 'Lora', serif;
+    font-size: 2rem; font-weight: 600; color: #fff;
+    line-height: 1.2; margin-bottom: 5px; overflow-wrap:anywhere;
+  }
+  .quiz-label { font-size: 0.75rem; color: var(--muted); margin-top: 6px; }
+
+  /* CHOICES */
+  .choices { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+
+  .choice-btn {
+    width: 100%; padding: 13px 14px;
+    border-radius: 14px; border: 1.8px solid var(--border);
+    background: var(--card2); color: var(--text);
+    font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700;
+    cursor: pointer; transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    text-align: left; display: flex; align-items: center; gap: 11px;
+    animation: fadeUp 0.25s ease;
+    min-height: 52px;
+  }
+  .choice-btn:active:not(.disabled) { transform: scale(0.97); }
+  .choice-btn:hover:not(.disabled)  { border-color: var(--accent); background: #1e2040; }
+  .choice-btn:hover:not(.disabled) .cletter { background: var(--accent); color: #fff; }
+
+  .cletter {
+    min-width: 28px; height: 28px; border-radius: 8px;
+    background: var(--border); display: flex; align-items: center;
+    justify-content: center; font-size: 0.75rem; font-weight: 900;
+    transition: background 0.15s, color 0.15s; flex-shrink: 0;
+  }
+  .choice-text { min-width:0; overflow-wrap:anywhere; line-height:1.25; }
+
+  /* Answer states */
+  .choice-btn.correct          { border-color: var(--green); background: #0a2218; color: var(--green); }
+  .choice-btn.correct .cletter { background: var(--green); color: #0a1f12; }
+  .choice-btn.wrong            { border-color: var(--red); background: #2a0c14; color: var(--red); opacity:.9; }
+  .choice-btn.wrong .cletter   { background: var(--red); color: #fff; }
+  .choice-btn.dimmed           { opacity: 0.35; }
+  .choice-btn.disabled         { cursor: default; }
+
+  /* FEEDBACK */
+  .feedback {
+    border-radius: 14px; padding: 13px 15px; margin-bottom: 12px;
+    display: flex; align-items: center; gap: 11px;
+    animation: fadeUp 0.2s ease; font-size: 0.88rem; font-weight: 700;
+  }
+  .feedback.correct { background:#0a2218; border:1.5px solid var(--green); color: var(--green); }
+  .feedback.wrong   { background:#2a0c14; border:1.5px solid var(--red); color:#fff; }
+  .feedback .ficon  { font-size: 1.4rem; }
+  .feedback .fsub   { font-size: 0.75rem; color:var(--muted); margin-top:3px; font-weight:600; }
+
+  .next-btn {
+    width: 100%; padding: 14px; border-radius: 14px; border: none;
+    font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 800;
+    cursor: pointer; background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    color:#fff; transition: transform 0.1s;
+  }
+  .next-btn:active { transform: scale(0.98); }
+
+  /* TEACH */
+  .teach-header {
+    background: linear-gradient(135deg,#2d1f5e,#1a2e4a);
+    border-radius: var(--radius); padding: 16px 18px; margin-bottom: 14px;
+    text-align:center; border:1.5px solid #3d3070;
+  }
+  .teach-header h2 { font-size:1rem; color:#c9c0ff; font-weight:700; }
+  .teach-header p  { font-size:0.75rem; color:var(--muted); margin-top:3px; }
+
+  .teach-card {
+    background: var(--card); border:1.5px solid var(--border);
+    border-radius: var(--radius); padding:22px 20px; margin-bottom:12px;
+    animation: fadeUp 0.3s ease; position:relative; overflow:hidden;
+  }
+  .teach-card::before {
+    content:''; position:absolute; left:0;top:0;bottom:0; width:4px;
+    background:linear-gradient(180deg,var(--accent),var(--accent2));
+    border-radius:4px 0 0 4px;
+  }
+  .teach-word { font-family:'Lora',serif; font-size:1.6rem; font-weight:600; color:#fff; margin-bottom:6px; }
+  .teach-tr   { font-size:1rem; font-weight:800; color:var(--yellow); margin-bottom:6px; }
+  .teach-syn  { font-size:0.8rem; color:var(--muted); font-style:italic; }
+  .teach-tip  {
+    background:var(--card2); border-radius:10px; padding:10px 12px;
+    margin-top:12px; font-size:0.8rem; color:#b0b8d8; line-height:1.5;
+    border:1px solid var(--border);
+  }
+  .teach-tip span { color:var(--accent2); font-weight:700; }
+
+  .nav-dots { display:flex; gap:7px; justify-content:center; margin-bottom:14px; }
+  .nav-dot {
+    width:8px;height:8px;border-radius:50%;background:var(--border);
+    transition:all 0.2s;cursor:pointer;
+  }
+  .nav-dot.active { background:var(--accent); width:20px; border-radius:4px; }
+
+  .btn-full {
+    width:100%; padding:14px; border-radius:14px; border:none;
+    font-family:'Nunito',sans-serif; font-size:0.95rem; font-weight:800;
+    cursor:pointer; background:linear-gradient(135deg,var(--accent),#8b5cf6);
+    color:#fff; transition:transform 0.1s; margin-bottom:8px;
+  }
+  .btn-full:active { transform:scale(0.98); }
+  .btn-full.secondary {
+    background:var(--card2); color:var(--muted);
+    border:1px solid var(--border); margin-bottom:0;
+  }
+
+  /* RESULT */
+  .result-card {
+    background:var(--card); border-radius:var(--radius); padding:28px 20px;
+    text-align:center; border:1.5px solid var(--border); animation:fadeUp 0.3s ease;
+  }
+  .result-emoji  { font-size:3rem; margin-bottom:10px; }
+  .result-title  { font-size:1.3rem; font-weight:900; color:#fff; margin-bottom:6px; }
+  .result-sub    { font-size:0.85rem; color:var(--muted); margin-bottom:20px; line-height:1.5; }
+  .result-stats  { display:flex; gap:10px; justify-content:center; margin-bottom:20px; }
+  .stat-box      { flex:1; background:var(--card2); border-radius:12px; padding:12px 8px; border:1px solid var(--border); }
+  .stat-num      { font-size:1.6rem; font-weight:900; }
+  .stat-label    { font-size:0.7rem; color:var(--muted); font-weight:600; }
+  .stat-box.g .stat-num { color:var(--green); }
+
+  /* LEARNED LIST */
+  .list-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .list-header h2 { font-size:1rem; font-weight:800; }
+  .list-count {
+    font-size:0.75rem; background:var(--card2); border:1px solid var(--border);
+    padding:3px 10px; border-radius:99px; color:var(--muted);
+  }
+  .list-item {
+    background:var(--card); border:1.5px solid var(--border); border-radius:12px;
+    padding:12px 14px; margin-bottom:8px; display:flex; align-items:center;
+    justify-content:space-between; gap:8px;
+  }
+  .list-word { font-family:'Lora',serif; font-size:1rem; font-weight:600; color:#fff; }
+  .list-tr   { font-size:0.78rem; color:var(--yellow); font-weight:700; text-align:right; flex-shrink:0; }
+  .empty-state { text-align:center; padding:40px 20px; color:var(--muted); font-size:0.9rem; line-height:1.6; }
+  .empty-icon  { font-size:2.5rem; margin-bottom:10px; }
+
+  @media (max-width: 420px) {
+    body { padding-left: 10px; padding-right: 10px; }
+    h1 { font-size: 1.35rem; }
+    .tabs { gap: 6px; margin-bottom: 12px; }
+    .tab { font-size: 0.72rem; padding: 8px 4px; }
+    .quiz-card { padding: 22px 14px 18px; margin-bottom: 12px; }
+    .quiz-word { font-size: clamp(1.45rem, 8vw, 1.9rem); }
+    .choices { gap: 8px; }
+    .choice-btn { border-radius: 12px; font-size: 0.86rem; padding: 12px 10px; gap: 9px; }
+    .feedback { align-items:flex-start; }
+    .result-stats { flex-direction: column; }
+    .list-item { align-items:flex-start; flex-direction:column; }
+    .list-tr { text-align:left; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Kelime Ogren</h1>
+<p class="subtitle">Bankacilik Ingilizce Kelime Havuzu</p>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('quiz')">Quiz</button>
+  <button class="tab"        onclick="switchTab('learned')">Ogrendiklerim</button>
+</div>
+
+<div id="app"></div>
+
+<script>
+const LETTERS = ['A','B','C','D','E'];
+
+const RAW = [
+  ["Abandon","Give up","Terk etmek","V"],["Abolish","Eliminate","Y�r�rl�kten kaldirmak","V"],["Accelerate","Speed up","Hizlandirmak","V"],["Acknowledge","Admit","Kabul etmek","V"],["Acquire","Obtain","Edinmek","V"],["Adapt","Adjust","Uyarlamak","V"],["Address","Deal with","Ele almak","V"],["Advocate","Support","Savunmak","V"],["Alter","Change","Degistirmek","V"],["Anticipate","Expect","�ng�rmek","V"],["Approve","Endorse","Onaylamak","V"],["Argue","Debate","Tartismak","V"],["Assess","Evaluate","Degerlendirmek","V"],["Assign","Allocate","Atamak","V"],["Assume","Presume","Varsaymak","V"],["Attain","Achieve","Ulasmak","V"],["Avoid","Refrain","Ka�inmak","V"],["Balance","Stabilize","Dengelemek","V"],["Boost","Increase","Artirmak","V"],["Cease","Stop","Durdurmak","V"],["Claim","Assert","Iddia etmek","V"],["Clarify","Explain","A�ikliga kavusturmak","V"],["Commence","Begin","Baslamak","V"],["Commit","Dedicate","Adamak","V"],["Compare","Contrast","Karsilastirmak","V"],["Compensate","Reimburse","Telafi etmek","V"],["Comply","Obey","Uymak","V"],["Conclude","Finish","Sonu�landirmak","V"],["Conduct","Carry out","Y�r�tmek","V"],["Confine","Restrict","Sinirlamak","V"],["Confront","Face","Y�zlesmek","V"],["Conserve","Preserve","Korumak","V"],["Constitute","Form","Olusturmak","V"],["Construct","Build","Insa etmek","V"],["Contribute","Donate","Katkida bulunmak","V"],["Convert","Transform","D�n�st�rmek","V"],["Correlate","Connect","Iliskilendirmek","V"],["Define","Describe","Tanimlamak","V"],["Demonstrate","Show","G�stermek","V"],["Derive","Obtain","T�retmek","V"],["Detect","Discover","Tespit etmek","V"],["Determine","Decide","Belirlemek","V"],["Devote","Commit","Adamak","V"],["Differ","Vary","Farkli olmak","V"],["Disclose","Reveal","A�iklamak","V"],["Disrupt","Disturb","Bozmak","V"],["Distinguish","Differentiate","Ayirt etmek","V"],["Emphasize","Highlight","Vurgulamak","V"],["Enable","Allow","Olanak saglamak","V"],["Enforce","Implement","Zorla uygulamak","V"],["Enhance","Improve","Gelistirmek","V"],["Ensure","Guarantee","Saglamak","V"],["Establish","Set up","Kurmak","V"],["Evaluate","Assess","Degerlendirmek","V"],["Examine","Inspect","Incelemek","V"],["Expand","Widen","Genisletmek","V"],["Facilitate","Ease","Kolaylastirmak","V"],["Forecast","Predict","Tahmin etmek","V"],["Fulfill","Accomplish","Yerine getirmek","V"],["Generate","Produce","�retmek","V"],["Govern","Rule","Y�netmek","V"],["Implement","Apply","Uygulamak","V"],["Influence","Affect","Etkilemek","V"],["Inhibit","Prevent","Engellemek","V"],["Integrate","Combine","B�t�nlestirmek","V"],["Interpret","Explain","Yorumlamak","V"],["Justify","Defend","Hakli �ikarmak","V"],["Maintain","Preserve","S�rd�rmek","V"],["Minimize","Reduce","En aza indirmek","V"],["Neglect","Ignore","Ihmal etmek","V"],["Obtain","Gain","Elde etmek","V"],["Overcome","Defeat","�stesinden gelmek","V"],["Participate","Engage","Katilmak","V"],["Persist","Continue","Israr etmek","V"],["Predict","Foresee","�ng�rmek","V"],["Prevent","Stop","�nlemek","V"],["Promote","Encourage","Tesvik etmek","V"],["Pursue","Seek","Pesinden gitmek","V"],["Reduce","Decrease","Azaltmak","V"],["Reinforce","Strengthen","G��lendirmek","V"],["Reject","Refuse","Reddetmek","V"],["Retain","Keep","Muhafaza etmek","V"],["Reveal","Uncover","Ortaya �ikarmak","V"],
+  ["Access","Entry","Erisim","N"],["Accuracy","Precision","Dogruluk","N"],["Agreement","Pact","Anlasma","N"],["Allocation","Distribution","Tahsis","N"],["Ambiguity","Vagueness","Belirsizlik","N"],["Amendment","Revision","Degisiklik","N"],["Analysis","Examination","Analiz","N"],["Approach","Method","Yaklasim","N"],["Approval","Authorization","Onay","N"],["Assumption","Presumption","Varsayim","N"],["Authority","Power","Otorite","N"],["Awareness","Consciousness","Farkindalik","N"],["Barrier","Obstacle","Engel","N"],["Benefit","Advantage","Yarar","N"],["Capacity","Ability","Kapasite","N"],["Challenge","Difficulty","Zorluk","N"],["Commitment","Dedication","Baglilik","N"],["Commodity","Product","Mal","N"],["Competition","Rivalry","Rekabet","N"],["Compliance","Conformity","Uyum","N"],["Component","Element","Bilesen","N"],["Conclusion","Result","Sonu�","N"],["Confidence","Trust","G�ven","N"],["Constraint","Restriction","Kisitlama","N"],["Credibility","Reliability","G�venilirlik","N"],["Criterion","Standard","Kriter","N"],["Demand","Request","Talep","N"],["Development","Growth","Gelisim","N"],["Diversity","Variety","�esitlilik","N"],["Efficiency","Effectiveness","Verimlilik","N"],["Evidence","Proof","Kanit","N"],["Framework","Structure","�er�eve","N"],["Goal","Aim","Hedef","N"],["Growth","Increase","B�y�me","N"],["Impact","Influence","Etki","N"],["Income","Revenue","Gelir","N"],["Indicator","Sign","G�sterge","N"],["Infrastructure","Foundation","Altyapi","N"],["Innovation","Novelty","Yenilik","N"],["Insight","Understanding","Kavrayis","N"],["Institution","Organization","Kurum","N"],["Integrity","Honesty","D�r�stl�k","N"],["Intervention","Involvement","M�dahale","N"],
+  ["Account","Record","Hesap","N"],["Asset","Property","Varlik","N"],["Budget","Plan","B�t�e","N"],["Capital","Funds","Sermaye","N"],["Cash","Money","Nakit","N"],["Credit","Loan","Kredi","N"],["Debt","Liability","Bor�","N"],["Default","Failure","Temerr�t","N"],["Deposit","Savings","Mevduat","N"],["Dividend","Profit share","Temett�","N"],["Equity","Ownership","�zsermaye","N"],["Expense","Cost","Masraf","N"],["Fraud","Deception","Dolandiricilik","N"],["Guarantee","Assurance","Garanti","N"],["Inflation","Price rise","Enflasyon","N"],["Insurance","Coverage","Sigorta","N"],["Interest","Return","Faiz","N"],["Investment","Funding","Yatirim","N"],["Invoice","Bill","Fatura","N"],["Liability","Responsibility","Y�k�ml�l�k","N"],["Liquidity","Cash flow","Likidite","N"],["Loan","Credit","Bor�","N"],["Margin","Profit","K�r payi","N"],["Market","Exchange","Piyasa","N"],["Mortgage","Home loan","Ipotek","N"],["Payment","Remittance","�deme","N"],["Portfolio","Collection","Portf�y","N"],["Profit","Gain","K�r","N"],["Revenue","Income","Gelir","N"],["Risk","Danger","Risk","N"],["Salary","Wage","Maas","N"],["Savings","Deposits","Tasarruf","N"],["Share","Portion","Hisse","N"],["Stock","Equity","Hisse senedi","N"],["Transaction","Deal","Islem","N"],
+  ["Abundant","Plentiful","Bol","Adj"],["Accurate","Precise","Dogru","Adj"],["Adequate","Sufficient","Yeterli","Adj"],["Adverse","Harmful","Olumsuz","Adj"],["Ambiguous","Vague","Belirsiz","Adj"],["Appropriate","Suitable","Uygun","Adj"],["Authentic","Genuine","Ger�ek","Adj"],["Beneficial","Useful","Faydali","Adj"],["Capable","Competent","Yetenekli","Adj"],["Coherent","Logical","Tutarli","Adj"],["Comprehensive","Extensive","Kapsamli","Adj"],["Crucial","Critical","Hayati","Adj"],["Durable","Long-lasting","Dayanikli","Adj"],["Ethical","Moral","Etik","Adj"],["Evident","Clear","A�ik","Adj"],["Excessive","Extreme","Asiri","Adj"],["Feasible","Possible","M�mk�n","Adj"],["Flexible","Adaptable","Esnek","Adj"],["Fundamental","Basic","Temel","Adj"],["Inevitable","Unavoidable","Ka�inilmaz","Adj"],["Innovative","Creative","Yenilik�i","Adj"],["Legitimate","Legal","Mesru","Adj"],["Mandatory","Obligatory","Zorunlu","Adj"],["Reliable","Trustworthy","G�venilir","Adj"],["Resilient","Strong","Dayanikli","Adj"],["Significant","Important","�nemli","Adj"],["Sustainable","Maintainable","S�rd�r�lebilir","Adj"],["Valid","Legitimate","Ge�erli","Adj"],["Vulnerable","Defenseless","Savunmasiz","Adj"],
+  ["Accordingly","Consequently","Buna g�re","Adv"],["Approximately","Roughly","Yaklasik","Adv"],["Clearly","Obviously","A�ik�a","Adv"],["Consistently","Steadily","Tutarli bi�imde","Adv"],["Continuously","Constantly","S�rekli","Adv"],["Currently","Presently","H�lihazirda","Adv"],["Effectively","Efficiently","Etkili sekilde","Adv"],["Eventually","Finally","Eninde sonunda","Adv"],["Frequently","Often","Siklikla","Adv"],["Fundamentally","Essentially","Temel olarak","Adv"],["Gradually","Progressively","Asamali olarak","Adv"],["Immediately","Instantly","Aninda","Adv"],["Increasingly","Progressively","Giderek","Adv"],["Initially","At first","Baslangi�ta","Adv"],["Largely","Mostly","B�y�k �l��de","Adv"],["Mainly","Chiefly","Baslica","Adv"],["Moreover","Besides","Dahasi","Adv"],["Particularly","Especially","�zellikle","Adv"],["Precisely","Exactly","Tam olarak","Adv"],["Primarily","Chiefly","�ncelikle","Adv"],["Significantly","Considerably","�nemli �l��de","Adv"],["Subsequently","Afterwards","Sonradan","Adv"],["Ultimately","Finally","Nihayetinde","Adv"],
+  ["Account for","Explain","A�iklamak","Expr"],["Back up","Support","Desteklemek","Expr"],["Break down","Collapse","Bozulmak","Expr"],["Carry out","Perform","Ger�eklestirmek","Expr"],["Deal with","Handle","Ele almak","Expr"],["Figure out","Understand","��zmek","Expr"],["Give up","Quit","Vazge�mek","Expr"],["Keep up with","Follow","Ayak uydurmak","Expr"],["Look into","Investigate","Arastirmak","Expr"],["Make up for","Compensate","Telafi etmek","Expr"],["Put forward","Propose","�ne s�rmek","Expr"],["Run out of","Exhaust","Bitmek","Expr"],["Set up","Establish","Kurmak","Expr"],["Stand out","Be noticeable","Dikkat �ekmek","Expr"],["Take over","Assume control","Devralmak","Expr"],
+  ["Make a decision","Decide","Karar vermek","Expr"],["Take responsibility","Be accountable","Sorumluluk almak","Expr"],["Reach an agreement","Settle","Anlasmaya varmak","Expr"],["Face a challenge","Confront","Zorlukla karsilasmak","Expr"],["Gain access","Obtain entry","Erisim saglamak","Expr"],["Have an impact","Affect","Etki yapmak","Expr"],["Meet the deadline","Finish on time","Son tarihe yetismek","Expr"],["Pay attention","Focus","Dikkat etmek","Expr"],["Raise awareness","Increase consciousness","Farkindalik yaratmak","Expr"],["Reduce costs","Cut expenses","Maliyetleri d�s�rmek","Expr"],["Take action","Act","Harekete ge�mek","Expr"],["Build trust","Establish confidence","G�ven insa etmek","Expr"],["Maintain stability","Keep balance","Istikrari korumak","Expr"],
+];
+
+const TR_FIXES = {
+  "Abolish":"Yururlukten kaldirmak","Accelerate":"Hizlandirmak","Alter":"Degistirmek","Anticipate":"Ongormek","Argue":"Tartismak","Assess":"Degerlendirmek","Attain":"Ulasmak","Avoid":"Kacinmak","Boost":"Artirmak","Claim":"Iddia etmek","Clarify":"Acikliga kavusturmak","Commence":"Baslamak","Compare":"Karsilastirmak","Conclude":"Sonuclandirmak","Conduct":"Yurutmek","Confine":"Sinirlamak","Confront":"Yuzlesmek","Constitute":"Olusturmak","Construct":"Insa etmek","Contribute":"Katkida bulunmak","Convert":"Donusturmek","Correlate":"Iliskilendirmek","Demonstrate":"Gostermek","Derive":"Turetmek","Differ":"Farkli olmak","Disclose":"Aciklamak","Enable":"Olanak saglamak","Enhance":"Gelistirmek","Ensure":"Saglamak","Evaluate":"Degerlendirmek","Examine":"Incelemek","Expand":"Genisletmek","Facilitate":"Kolaylastirmak","Generate":"Uretmek","Govern":"Yonetmek","Integrate":"Butunlestirmek","Justify":"Hakli cikarmak","Maintain":"Surdurmek","Neglect":"Ihmal etmek","Overcome":"Ustesinden gelmek","Predict":"Ongormek","Prevent":"Onlemek","Promote":"Tesvik etmek","Pursue":"Pesinden gitmek","Reinforce":"Guclendirmek","Reveal":"Ortaya cikarmak",
+  "Conclusion":"Sonuc","Confidence":"Guven","Credibility":"Guvenilirlik","Diversity":"Cesitlilik","Framework":"Cerceve","Growth":"Buyume","Indicator":"Gosterge","Integrity":"Durustluk","Intervention":"Mudahale",
+  "Budget":"Butce","Debt":"Borc","Default":"Temerrut","Dividend":"Temettu","Equity":"Ozsermaye","Liability":"Yukumluluk","Loan":"Borc","Margin":"Kar payi","Payment":"Odeme","Portfolio":"Portfoy","Profit":"Kar",
+  "Authentic":"Gercek","Evident":"Acik","Feasible":"Mumkun","Inevitable":"Kacinilmaz","Innovative":"Yenilikci","Reliable":"Guvenilir","Significant":"Onemli","Sustainable":"Surdurulebilir","Valid":"Gecerli",
+  "Accordingly":"Buna gore","Clearly":"Acikca","Consistently":"Tutarli bicimde","Continuously":"Surekli","Currently":"Halihazirda","Initially":"Baslangicta","Largely":"Buyuk olcude","Particularly":"Ozellikle","Primarily":"Oncelikle","Significantly":"Onemli olcude",
+  "Account for":"Aciklamak","Carry out":"Gerceklestirmek","Figure out":"Cozmek","Give up":"Vazgecmek","Put forward":"One surmek","Stand out":"Dikkat cekmek","Reduce costs":"Maliyetleri dusurmek","Take action":"Harekete gecmek","Build trust":"Guven insa etmek"
+};
+
+function trOf(w){
+  return TR_FIXES[w.word] || w.tr.replace(/\uFFFD/g,'');
+}
+
+// ===== STATE =====
+let S = {
+  allWords: [],
+  usedWords: new Set(),
+  learnedWords: [],
+  quiz: [],          // current 10-word set
+  idx: 0,           // current question index
+  unknowns: [],     // wrong answers this round
+  phase: 'quiz',    // quiz | teach | result
+  teachIdx: 0,
+  tab: 'quiz',
+  choices: [],       // 5 options for current question
+  correctPos: -1,    // which position is correct
+  selected: -1,
+  answered: false,
+};
+
+function memTip(w, tr, syn) {
+  const tips = [
+    `"<span>${w}</span>" kelimesi Turkcede <strong style="color:var(--yellow)">${tr}</strong> anlamina gelir. Synonym: ${syn}`,
+    `Hatirla: <span>${w}</span> - ${syn} - <strong style="color:var(--yellow)">${tr}</strong>`,
+    `"${w}" kelimesini "${tr}" olarak ezberle. Benzer kelime: <span>${syn}</span>`,
+    `Ing: <span>${w}</span> | Turkce: <strong style="color:var(--yellow)">${tr}</strong> | Esanlamli: ${syn}`,
+  ];
+  return tips[Math.floor(Math.random()*tips.length)];
+}
+
+function shuffle(a){
+  const r=[...a];
+  for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}
+  return r;
+}
+
+function save(){
+  try{
+    localStorage.setItem('kl_learned',JSON.stringify(S.learnedWords));
+    localStorage.setItem('kl_used',JSON.stringify([...S.usedWords]));
+  }catch(e){}
+}
+
+function load(){
+  try{
+    const l=localStorage.getItem('kl_learned'); if(l) S.learnedWords=JSON.parse(l);
+    const u=localStorage.getItem('kl_used');    if(u) S.usedWords=new Set(JSON.parse(u));
+  }catch(e){}
+}
+
+function available(){
+  const lid=new Set(S.learnedWords.map(w=>w.id));
+  return S.allWords.filter(w=>!lid.has(w.id)&&!S.usedWords.has(w.id));
+}
+
+function startNewQuiz(){
+  let avail=available();
+  if(avail.length<10){
+    S.usedWords=new Set(S.learnedWords.map(w=>w.id));
+    save();
+    avail=available();
+  }
+  const picked=shuffle(avail).slice(0,10);
+  if(picked.length===0){
+    S.quiz=[]; S.idx=0; S.unknowns=[]; S.phase='result';
+    save(); render(); return;
+  }
+  picked.forEach(w=>S.usedWords.add(w.id));
+  S.quiz=picked; S.idx=0; S.unknowns=[]; S.phase='quiz';
+  save();
+  buildChoices();
+  render();
+}
+
+function buildChoices(){
+  if(S.phase!=='quiz'||S.idx>=S.quiz.length) return;
+  const correct=S.quiz[S.idx];
+  // 4 wrong options, each with a different Turkish meaning.
+  const pool=shuffle(S.allWords.filter(w=>w.id!==correct.id&&trOf(w)!==trOf(correct)));
+  const five=shuffle([correct,...pool.slice(0,4)]);
+  S.choices=five;
+  S.correctPos=five.findIndex(w=>w.id===correct.id);
+  S.selected=-1;
+  S.answered=false;
+}
+
+function pick(i){
+  if(S.answered) return;
+  S.selected=i; S.answered=true;
+  const correct=S.quiz[S.idx];
+  if(i===S.correctPos){
+    if(!S.learnedWords.find(w=>w.id===correct.id)) S.learnedWords.push(correct);
+  } else {
+    S.unknowns.push(correct);
+  }
+  save(); render();
+}
+
+function nextQ(){
+  S.idx++;
+  if(S.idx>=S.quiz.length){
+    if(S.unknowns.length===0){ S.phase='result'; }
+    else { S.phase='teach'; S.teachIdx=0; }
+    save(); render(); return;
+  }
+  buildChoices(); render();
+}
+
+function nextTeach(){
+  S.teachIdx++;
+  if(S.teachIdx>=S.unknowns.length){
+    S.quiz=shuffle(S.unknowns); S.unknowns=[];
+    S.idx=0; S.phase='quiz';
+    buildChoices();
+  }
+  render();
+}
+function prevTeach(){ if(S.teachIdx>0){S.teachIdx--;render();} }
+function goTeach(i){ S.teachIdx=i; render(); }
+function doneTeach(){
+  const rem=S.unknowns.length>0?S.unknowns:S.quiz.filter(w=>!S.learnedWords.find(l=>l.id===w.id));
+  if(rem.length===0){S.phase='result';render();return;}
+  S.quiz=shuffle(rem); S.unknowns=[];
+  S.idx=0; S.phase='quiz';
+  buildChoices(); render();
+}
+
+function switchTab(t){
+  S.tab=t;
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    el.classList.toggle('active',(i===0&&t==='quiz')||(i===1&&t==='learned'));
+  });
+  render();
+}
+
+function badge(type){ return `<span class="word-type-badge badge-${type}">${type}</span>`; }
+
+// ===== RENDER =====
+function render(){
+  const app=document.getElementById('app');
+  if(S.tab==='learned'){renderLearned(app);return;}
+  if(S.phase==='quiz')   renderQuiz(app);
+  else if(S.phase==='teach')  renderTeach(app);
+  else if(S.phase==='result') renderResult(app);
+}
+
+function renderQuiz(app){
+  const total=S.quiz.length, idx=S.idx;
+  const word=S.quiz[idx];
+  if(!word){ renderResult(app); return; }
+  const pct=Math.round(idx/total*100);
+  const {choices,correctPos,selected,answered}=S;
+
+  const choicesHTML=choices.map((c,i)=>{
+    let cls='choice-btn';
+    if(answered){
+      cls+=' disabled';
+      if(i===correctPos)      cls+=' correct';
+      else if(i===selected)   cls+=' wrong';
+      else                    cls+=' dimmed';
+    }
+    return `<button class="${cls}" onclick="pick(${i})">
+      <span class="cletter">${LETTERS[i]}</span>
+      <span class="choice-text">${trOf(c)}</span>
+    </button>`;
+  }).join('');
+
+  let feedbackHTML='';
+  if(answered){
+    const ok=selected===correctPos;
+    if(ok){
+      feedbackHTML=`<div class="feedback correct">
+        <span class="ficon">OK</span>
+        <div><div>Dogru! Harika!</div></div>
+      </div>`;
+    } else {
+      feedbackHTML=`<div class="feedback wrong">
+        <span class="ficon">X</span>
+        <div>
+          <div>Yanlis cevap</div>
+          <div class="fsub">Dogru cevap: <strong style="color:var(--green)">${trOf(word)}</strong></div>
+        </div>
+      </div>`;
+    }
+  }
+
+  app.innerHTML=`
+    <div class="progress-label">
+      <span>Soru ${idx+1} / ${total}</span>
+      <span>${S.learnedWords.length} ogrenildi</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" style="width:${pct}%"></div>
+    </div>
+    <div class="quiz-card">
+      ${badge(word.type)}
+      <div class="quiz-word">${word.word}</div>
+      <div class="quiz-label">Turkce karsiligini sec</div>
+    </div>
+    <div class="choices">${choicesHTML}</div>
+    ${feedbackHTML}
+    ${answered?`<button class="next-btn" onclick="nextQ()">${idx+1<total?'Sonraki Soru':'Sonuclari Gor'}</button>`:''}
+  `;
+}
+
+function renderTeach(app){
+  const words=S.unknowns, idx=S.teachIdx, word=words[idx];
+  const meaning=trOf(word);
+  const dots=words.map((_,i)=>`<div class="nav-dot ${i===idx?'active':''}" onclick="goTeach(${i})"></div>`).join('');
+  app.innerHTML=`
+    <div class="teach-header">
+      <h2>Ogrenme Zamani!</h2>
+      <p>${words.length} kelimeyi incele, sonra tekrar test edileceksin.</p>
+    </div>
+    <div class="teach-card">
+      <div style="margin-bottom:10px">${badge(word.type)}<div class="teach-word">${word.word}</div></div>
+      <div class="teach-tr">${meaning}</div>
+      <div class="teach-syn">Synonym: ${word.synonym}</div>
+      <div class="teach-tip">${memTip(word.word,meaning,word.synonym)}</div>
+    </div>
+    <div class="nav-dots">${dots}</div>
+    ${idx<words.length-1
+      ?`<button class="btn-full" onclick="nextTeach()">Sonraki Kelime</button>`
+      :`<button class="btn-full" onclick="doneTeach()">Tekrar Test Et</button>`}
+    ${idx>0?`<button class="btn-full secondary" onclick="prevTeach()">Onceki</button>`:''}
+  `;
+}
+
+function renderResult(app){
+  app.innerHTML=`
+    <div class="result-card">
+      <div class="result-emoji">100%</div>
+      <div class="result-title">Turu Tamamladin!</div>
+      <div class="result-sub">Bu turdaki kelimeleri tamamladin.<br>Toplam ogrenilen: <strong>${S.learnedWords.length} kelime</strong></div>
+      <div class="result-stats">
+        <div class="stat-box g">
+          <div class="stat-num">${S.learnedWords.length}</div>
+          <div class="stat-label">Ogrenilen</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" style="color:var(--muted)">${S.allWords.length-S.learnedWords.length}</div>
+          <div class="stat-label">Kalan</div>
+        </div>
+      </div>
+      <button class="btn-full" onclick="startNewQuiz()">Yeni Tur Baslat</button>
+    </div>
+  `;
+}
+
+function renderLearned(app){
+  const words=S.learnedWords;
+  app.innerHTML=`
+    <div class="list-header">
+      <h2>Ogrendiklerim</h2>
+      <span class="list-count">${words.length} kelime</span>
+    </div>
+    ${words.length===0?`
+      <div class="empty-state">
+        <div class="empty-icon">0</div>
+        <p>Henuz kelime ogrenmedin.<br>Quiz'e giderek ogrenmeye basla!</p>
+      </div>
+    `:words.slice().reverse().map(w=>`
+      <div class="list-item">
+        <div>
+          <div class="list-word">${w.word}</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">${w.synonym}</div>
+        </div>
+        <div class="list-tr">${trOf(w)}</div>
+      </div>
+    `).join('')}
+    ${words.length>0?`<button class="btn-full secondary" style="margin-top:12px;color:var(--red)" onclick="clearLearned()">Listeyi Sifirla</button>`:''}
+  `;
+}
+
+function clearLearned(){
+  if(confirm('Listeyi sifirlamak istedigine emin misin?')){
+    S.learnedWords=[]; S.usedWords=new Set(); save(); render();
+  }
+}
+
+// ===== INIT =====
+S.allWords=RAW.map((r,i)=>({id:i,word:r[0],synonym:r[1],tr:r[2],type:r[3]}));
+load();
+startNewQuiz();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
+
