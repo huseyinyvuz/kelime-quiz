@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
@@ -198,6 +198,12 @@
   }
   .teach-tip span { color:var(--accent2); font-weight:700; }
 
+  .teach-example { margin-top:16px; padding:14px; background:var(--card2); border:1px solid var(--border); border-radius:12px; overflow-wrap:anywhere; }
+  .teach-example-label { font-size:0.72rem; font-weight:800; color:var(--accent2); margin-bottom:8px; }
+  .teach-example-en { font-size:0.95rem; line-height:1.6; }
+  .teach-example-en mark { background:transparent; color:var(--yellow); font-weight:800; }
+  .teach-example-tr { margin-top:8px; font-size:0.85rem; color:#b0b8d8; line-height:1.5; }
+
   .nav-dots { display:flex; gap:7px; justify-content:center; margin-bottom:14px; }
   .nav-dot {
     width:8px;height:8px;border-radius:50%;background:var(--border);
@@ -300,6 +306,992 @@ const TR_FIXES = {
 
 function trOf(w){
   return TR_FIXES[w.word] || w.tr.replace(/\uFFFD/g,'');
+}
+
+// Local examples remain available offline and do not change saved progress.
+const EXAMPLES = {
+  "Abandon": {
+    "en": "We may abandon the project.",
+    "tr": "Projeden vazgeçebiliriz."
+  },
+  "Abolish": {
+    "en": "They plan to abolish this tax.",
+    "tr": "Bu vergiyi kaldırmayı planlıyorlar."
+  },
+  "Accelerate": {
+    "en": "New software can accelerate the process.",
+    "tr": "Yeni yazılım süreci hızlandırabilir."
+  },
+  "Acknowledge": {
+    "en": "We acknowledge our mistake.",
+    "tr": "Hatamızı kabul ediyoruz."
+  },
+  "Acquire": {
+    "en": "The company will acquire a small bank.",
+    "tr": "Şirket küçük bir banka satın alacak."
+  },
+  "Adapt": {
+    "en": "We must adapt to new conditions.",
+    "tr": "Yeni koşullara uyum sağlamalıyız."
+  },
+  "Address": {
+    "en": "We need to address this problem.",
+    "tr": "Bu sorunu ele almamız gerekiyor."
+  },
+  "Advocate": {
+    "en": "Many experts advocate this approach.",
+    "tr": "Birçok uzman bu yaklaşımı savunuyor."
+  },
+  "Alter": {
+    "en": "Do not alter the original document.",
+    "tr": "Orijinal belgeyi değiştirme."
+  },
+  "Anticipate": {
+    "en": "We anticipate an increase in demand.",
+    "tr": "Talepte bir artış öngörüyoruz."
+  },
+  "Approve": {
+    "en": "The manager must approve the payment.",
+    "tr": "Müdür ödemeyi onaylamalı."
+  },
+  "Argue": {
+    "en": "They argue about the budget.",
+    "tr": "Bütçe hakkında tartışıyorlar."
+  },
+  "Assess": {
+    "en": "We need to assess the risks.",
+    "tr": "Riskleri değerlendirmemiz gerekiyor."
+  },
+  "Assign": {
+    "en": "We will assign this task to you.",
+    "tr": "Bu görevi sana vereceğiz."
+  },
+  "Assume": {
+    "en": "Do not assume that everyone agrees.",
+    "tr": "Herkesin aynı fikirde olduğunu varsayma."
+  },
+  "Attain": {
+    "en": "You can attain your goal with practice.",
+    "tr": "Pratik yaparak hedefine ulaşabilirsin."
+  },
+  "Avoid": {
+    "en": "Try to avoid unnecessary expenses.",
+    "tr": "Gereksiz masraflardan kaçınmaya çalış."
+  },
+  "Balance": {
+    "en": "You need to balance work and rest.",
+    "tr": "Çalışmayı ve dinlenmeyi dengelemen gerekiyor."
+  },
+  "Boost": {
+    "en": "This campaign may boost sales.",
+    "tr": "Bu kampanya satışları artırabilir."
+  },
+  "Cease": {
+    "en": "The factory will cease production tomorrow.",
+    "tr": "Fabrika yarın üretimi durduracak."
+  },
+  "Claim": {
+    "en": "They claim that the service is free.",
+    "tr": "Hizmetin ücretsiz olduğunu iddia ediyorlar."
+  },
+  "Clarify": {
+    "en": "Could you clarify your answer?",
+    "tr": "Cevabını açıklığa kavuşturabilir misin?"
+  },
+  "Commence": {
+    "en": "The meeting will commence at nine.",
+    "tr": "Toplantı saat dokuzda başlayacak."
+  },
+  "Commit": {
+    "en": "We will commit more resources to training.",
+    "tr": "Eğitime daha fazla kaynak ayıracağız."
+  },
+  "Compare": {
+    "en": "Compare the prices before you buy.",
+    "tr": "Satın almadan önce fiyatları karşılaştır."
+  },
+  "Compensate": {
+    "en": "The bank will compensate customers for the error.",
+    "tr": "Banka hata nedeniyle müşterilerin zararını karşılayacak."
+  },
+  "Comply": {
+    "en": "All employees must comply with the rules.",
+    "tr": "Bütün çalışanlar kurallara uymalı."
+  },
+  "Conclude": {
+    "en": "We will conclude the meeting with a summary.",
+    "tr": "Toplantıyı bir özetle sonlandıracağız."
+  },
+  "Conduct": {
+    "en": "We will conduct a survey next week.",
+    "tr": "Gelecek hafta bir anket yapacağız."
+  },
+  "Confine": {
+    "en": "Please confine your comments to this topic.",
+    "tr": "Lütfen yorumlarını bu konuyla sınırla."
+  },
+  "Confront": {
+    "en": "We must confront the problem together.",
+    "tr": "Sorunla birlikte yüzleşmeliyiz."
+  },
+  "Conserve": {
+    "en": "We should conserve water.",
+    "tr": "Suyu korumalı ve tasarruflu kullanmalıyız."
+  },
+  "Constitute": {
+    "en": "Small businesses constitute most of our clients.",
+    "tr": "Müşterilerimizin çoğunu küçük işletmeler oluşturuyor."
+  },
+  "Construct": {
+    "en": "They will construct a new bridge.",
+    "tr": "Yeni bir köprü inşa edecekler."
+  },
+  "Contribute": {
+    "en": "Everyone can contribute to the project.",
+    "tr": "Herkes projeye katkıda bulunabilir."
+  },
+  "Convert": {
+    "en": "You can convert dollars into liras.",
+    "tr": "Doları liraya çevirebilirsin."
+  },
+  "Correlate": {
+    "en": "We can correlate these results with sales data.",
+    "tr": "Bu sonuçları satış verileriyle ilişkilendirebiliriz."
+  },
+  "Define": {
+    "en": "Please define the main objective.",
+    "tr": "Lütfen temel amacı tanımla."
+  },
+  "Demonstrate": {
+    "en": "Let me demonstrate how the app works.",
+    "tr": "Uygulamanın nasıl çalıştığını göstereyim."
+  },
+  "Derive": {
+    "en": "We derive useful insights from the data.",
+    "tr": "Verilerden yararlı çıkarımlar elde ediyoruz."
+  },
+  "Detect": {
+    "en": "This system can detect unusual transactions.",
+    "tr": "Bu sistem olağan dışı işlemleri tespit edebilir."
+  },
+  "Determine": {
+    "en": "We must determine the cause of the error.",
+    "tr": "Hatanın nedenini belirlemeliyiz."
+  },
+  "Devote": {
+    "en": "I devote an hour to studying every day.",
+    "tr": "Her gün bir saatimi ders çalışmaya ayırıyorum."
+  },
+  "Differ": {
+    "en": "The two reports differ in several ways.",
+    "tr": "İki rapor çeşitli açılardan farklılık gösteriyor."
+  },
+  "Disclose": {
+    "en": "Do not disclose your password.",
+    "tr": "Şifreni açıklama."
+  },
+  "Disrupt": {
+    "en": "A power cut can disrupt production.",
+    "tr": "Elektrik kesintisi üretimi aksatabilir."
+  },
+  "Distinguish": {
+    "en": "Can you distinguish fact from opinion?",
+    "tr": "Gerçek ile görüşü ayırt edebilir misin?"
+  },
+  "Emphasize": {
+    "en": "I want to emphasize the importance of safety.",
+    "tr": "Güvenliğin önemini vurgulamak istiyorum."
+  },
+  "Enable": {
+    "en": "These tools enable us to work faster.",
+    "tr": "Bu araçlar daha hızlı çalışmamızı sağlıyor."
+  },
+  "Enforce": {
+    "en": "The agency will enforce the new rules.",
+    "tr": "Kurum yeni kuralların uygulanmasını sağlayacak."
+  },
+  "Enhance": {
+    "en": "Training can enhance your skills.",
+    "tr": "Eğitim becerilerini geliştirebilir."
+  },
+  "Ensure": {
+    "en": "Please ensure that the door is locked.",
+    "tr": "Lütfen kapının kilitli olduğundan emin ol."
+  },
+  "Establish": {
+    "en": "They plan to establish a new company.",
+    "tr": "Yeni bir şirket kurmayı planlıyorlar."
+  },
+  "Evaluate": {
+    "en": "We will evaluate your proposal.",
+    "tr": "Teklifini değerlendireceğiz."
+  },
+  "Examine": {
+    "en": "Please examine the document carefully.",
+    "tr": "Lütfen belgeyi dikkatlice incele."
+  },
+  "Expand": {
+    "en": "The company plans to expand its operations.",
+    "tr": "Şirket faaliyetlerini genişletmeyi planlıyor."
+  },
+  "Facilitate": {
+    "en": "Clear instructions facilitate learning.",
+    "tr": "Açık talimatlar öğrenmeyi kolaylaştırır."
+  },
+  "Forecast": {
+    "en": "Analysts forecast higher sales next year.",
+    "tr": "Analistler gelecek yıl daha yüksek satışlar tahmin ediyor."
+  },
+  "Fulfill": {
+    "en": "We must fulfill our responsibilities.",
+    "tr": "Sorumluluklarımızı yerine getirmeliyiz."
+  },
+  "Generate": {
+    "en": "The investment can generate income.",
+    "tr": "Yatırım gelir sağlayabilir."
+  },
+  "Govern": {
+    "en": "These rules govern international trade.",
+    "tr": "Bu kurallar uluslararası ticareti düzenler."
+  },
+  "Implement": {
+    "en": "We will implement the new plan tomorrow.",
+    "tr": "Yeni planı yarın uygulayacağız."
+  },
+  "Influence": {
+    "en": "Interest rates influence investment decisions.",
+    "tr": "Faiz oranları yatırım kararlarını etkiler."
+  },
+  "Inhibit": {
+    "en": "High costs can inhibit growth.",
+    "tr": "Yüksek maliyetler büyümeyi engelleyebilir."
+  },
+  "Integrate": {
+    "en": "We need to integrate the two systems.",
+    "tr": "İki sistemi birleştirmemiz gerekiyor."
+  },
+  "Interpret": {
+    "en": "How do you interpret these results?",
+    "tr": "Bu sonuçları nasıl yorumluyorsun?"
+  },
+  "Justify": {
+    "en": "Can you justify this expense?",
+    "tr": "Bu masrafın gerekçesini açıklayabilir misin?"
+  },
+  "Maintain": {
+    "en": "We must maintain high standards.",
+    "tr": "Yüksek standartları korumalıyız."
+  },
+  "Minimize": {
+    "en": "Our goal is to minimize waste.",
+    "tr": "Amacımız israfı en aza indirmek."
+  },
+  "Neglect": {
+    "en": "Do not neglect your health.",
+    "tr": "Sağlığını ihmal etme."
+  },
+  "Obtain": {
+    "en": "You need to obtain permission first.",
+    "tr": "Önce izin alman gerekiyor."
+  },
+  "Overcome": {
+    "en": "We can overcome this difficulty.",
+    "tr": "Bu zorluğun üstesinden gelebiliriz."
+  },
+  "Participate": {
+    "en": "Would you like to participate in the meeting?",
+    "tr": "Toplantıya katılmak ister misin?"
+  },
+  "Persist": {
+    "en": "Problems may persist for several weeks.",
+    "tr": "Sorunlar birkaç hafta sürebilir."
+  },
+  "Predict": {
+    "en": "It is difficult to predict future prices.",
+    "tr": "Gelecekteki fiyatları tahmin etmek zor."
+  },
+  "Prevent": {
+    "en": "Regular checks help prevent errors.",
+    "tr": "Düzenli kontroller hataları önlemeye yardımcı olur."
+  },
+  "Promote": {
+    "en": "The campaign will promote healthy eating.",
+    "tr": "Kampanya sağlıklı beslenmeyi teşvik edecek."
+  },
+  "Pursue": {
+    "en": "She wants to pursue a career in banking.",
+    "tr": "Bankacılık alanında bir kariyer yapmak istiyor."
+  },
+  "Reduce": {
+    "en": "We need to reduce energy consumption.",
+    "tr": "Enerji tüketimini azaltmamız gerekiyor."
+  },
+  "Reinforce": {
+    "en": "These results reinforce our confidence.",
+    "tr": "Bu sonuçlar güvenimizi güçlendiriyor."
+  },
+  "Reject": {
+    "en": "The bank may reject the application.",
+    "tr": "Banka başvuruyu reddedebilir."
+  },
+  "Retain": {
+    "en": "We want to retain experienced employees.",
+    "tr": "Deneyimli çalışanları bünyemizde tutmak istiyoruz."
+  },
+  "Reveal": {
+    "en": "The report will reveal the main causes.",
+    "tr": "Rapor temel nedenleri ortaya çıkaracak."
+  },
+  "Access": {
+    "en": "You need a password to get access.",
+    "tr": "Erişim sağlamak için şifreye ihtiyacın var."
+  },
+  "Accuracy": {
+    "en": "Check the accuracy of the figures.",
+    "tr": "Rakamların doğruluğunu kontrol et."
+  },
+  "Agreement": {
+    "en": "We signed an agreement yesterday.",
+    "tr": "Dün bir anlaşma imzaladık."
+  },
+  "Allocation": {
+    "en": "The allocation of resources must be fair.",
+    "tr": "Kaynakların dağılımı adil olmalı."
+  },
+  "Ambiguity": {
+    "en": "There is some ambiguity in the contract.",
+    "tr": "Sözleşmede bazı belirsizlikler var."
+  },
+  "Amendment": {
+    "en": "The amendment changes the payment date.",
+    "tr": "Değişiklik ödeme tarihini değiştiriyor."
+  },
+  "Analysis": {
+    "en": "The analysis shows a rise in costs.",
+    "tr": "Analiz maliyetlerde bir artış olduğunu gösteriyor."
+  },
+  "Approach": {
+    "en": "We need a different approach.",
+    "tr": "Farklı bir yaklaşıma ihtiyacımız var."
+  },
+  "Approval": {
+    "en": "The project needs official approval.",
+    "tr": "Projenin resmî onaya ihtiyacı var."
+  },
+  "Assumption": {
+    "en": "This assumption may be wrong.",
+    "tr": "Bu varsayım yanlış olabilir."
+  },
+  "Authority": {
+    "en": "She has the authority to sign the contract.",
+    "tr": "Sözleşmeyi imzalama yetkisi var."
+  },
+  "Awareness": {
+    "en": "The campaign increases public awareness.",
+    "tr": "Kampanya toplumun farkındalığını artırıyor."
+  },
+  "Barrier": {
+    "en": "Language can be a barrier to communication.",
+    "tr": "Dil, iletişimin önünde bir engel olabilir."
+  },
+  "Benefit": {
+    "en": "Lower costs are a major benefit.",
+    "tr": "Daha düşük maliyetler önemli bir avantajdır."
+  },
+  "Capacity": {
+    "en": "The factory is operating at full capacity.",
+    "tr": "Fabrika tam kapasiteyle çalışıyor."
+  },
+  "Challenge": {
+    "en": "Finding a solution is a challenge.",
+    "tr": "Çözüm bulmak zor bir iş."
+  },
+  "Commitment": {
+    "en": "Success requires commitment.",
+    "tr": "Başarı bağlılık ve kararlılık gerektirir."
+  },
+  "Commodity": {
+    "en": "Oil is an important commodity.",
+    "tr": "Petrol önemli bir ticari maldır."
+  },
+  "Competition": {
+    "en": "Competition between banks is increasing.",
+    "tr": "Bankalar arasındaki rekabet artıyor."
+  },
+  "Compliance": {
+    "en": "Compliance with the rules is essential.",
+    "tr": "Kurallara uyum şarttır."
+  },
+  "Component": {
+    "en": "This component is part of the machine.",
+    "tr": "Bu bileşen makinenin bir parçasıdır."
+  },
+  "Conclusion": {
+    "en": "We reached the same conclusion.",
+    "tr": "Aynı sonuca vardık."
+  },
+  "Confidence": {
+    "en": "I have confidence in our team.",
+    "tr": "Ekibimize güveniyorum."
+  },
+  "Constraint": {
+    "en": "Time is our main constraint.",
+    "tr": "Zaman temel kısıtımız."
+  },
+  "Credibility": {
+    "en": "Accurate reports improve credibility.",
+    "tr": "Doğru raporlar güvenilirliği artırır."
+  },
+  "Criterion": {
+    "en": "Price is not the only criterion.",
+    "tr": "Fiyat tek kriter değildir."
+  },
+  "Demand": {
+    "en": "Demand for this product is growing.",
+    "tr": "Bu ürüne olan talep artıyor."
+  },
+  "Development": {
+    "en": "Training supports professional development.",
+    "tr": "Eğitim mesleki gelişimi destekler."
+  },
+  "Diversity": {
+    "en": "The team values diversity.",
+    "tr": "Ekip çeşitliliğe önem veriyor."
+  },
+  "Efficiency": {
+    "en": "The new system improves efficiency.",
+    "tr": "Yeni sistem verimliliği artırıyor."
+  },
+  "Evidence": {
+    "en": "We need more evidence.",
+    "tr": "Daha fazla kanıta ihtiyacımız var."
+  },
+  "Framework": {
+    "en": "The law provides a clear framework.",
+    "tr": "Yasa açık bir çerçeve sunuyor."
+  },
+  "Goal": {
+    "en": "Our goal is to improve quality.",
+    "tr": "Hedefimiz kaliteyi artırmak."
+  },
+  "Growth": {
+    "en": "The company reported strong growth.",
+    "tr": "Şirket güçlü bir büyüme bildirdi."
+  },
+  "Impact": {
+    "en": "The decision has a major impact.",
+    "tr": "Kararın büyük bir etkisi var."
+  },
+  "Income": {
+    "en": "Her monthly income is stable.",
+    "tr": "Aylık geliri istikrarlı."
+  },
+  "Indicator": {
+    "en": "Unemployment is an economic indicator.",
+    "tr": "İşsizlik ekonomik bir göstergedir."
+  },
+  "Infrastructure": {
+    "en": "The city needs better infrastructure.",
+    "tr": "Şehrin daha iyi bir altyapıya ihtiyacı var."
+  },
+  "Innovation": {
+    "en": "Innovation helps companies grow.",
+    "tr": "Yenilik şirketlerin büyümesine yardımcı olur."
+  },
+  "Insight": {
+    "en": "The report offers valuable insight into customer behavior.",
+    "tr": "Rapor müşteri davranışları hakkında değerli bir kavrayış sunuyor."
+  },
+  "Institution": {
+    "en": "The bank is a financial institution.",
+    "tr": "Banka bir finans kurumudur."
+  },
+  "Integrity": {
+    "en": "We value honesty and integrity.",
+    "tr": "Dürüstlüğe ve ahlaki bütünlüğe önem veriyoruz."
+  },
+  "Intervention": {
+    "en": "Early intervention can prevent a crisis.",
+    "tr": "Erken müdahale bir krizi önleyebilir."
+  },
+  "Account": {
+    "en": "I opened a bank account.",
+    "tr": "Bir banka hesabı açtım."
+  },
+  "Asset": {
+    "en": "The building is a valuable asset.",
+    "tr": "Bina değerli bir varlıktır."
+  },
+  "Budget": {
+    "en": "We must stay within our budget.",
+    "tr": "Bütçemizin sınırları içinde kalmalıyız."
+  },
+  "Capital": {
+    "en": "The business needs more capital.",
+    "tr": "İşletmenin daha fazla sermayeye ihtiyacı var."
+  },
+  "Cash": {
+    "en": "Can I pay in cash?",
+    "tr": "Nakit ödeyebilir miyim?"
+  },
+  "Credit": {
+    "en": "The bank offers credit to small businesses.",
+    "tr": "Banka küçük işletmelere kredi sağlıyor."
+  },
+  "Debt": {
+    "en": "He wants to pay off his debt.",
+    "tr": "Borcunu tamamen ödemek istiyor."
+  },
+  "Default": {
+    "en": "The company is in default on its loan.",
+    "tr": "Şirket kredisi için temerrüde düşmüş durumda."
+  },
+  "Deposit": {
+    "en": "My deposit earns interest.",
+    "tr": "Mevduatım faiz getiriyor."
+  },
+  "Dividend": {
+    "en": "The company will pay a dividend.",
+    "tr": "Şirket temettü ödeyecek."
+  },
+  "Equity": {
+    "en": "The balance sheet shows the company's equity.",
+    "tr": "Bilanço şirketin özsermayesini gösteriyor."
+  },
+  "Expense": {
+    "en": "Rent is our largest expense.",
+    "tr": "Kira en büyük masrafımız."
+  },
+  "Fraud": {
+    "en": "The bank detected fraud.",
+    "tr": "Banka dolandırıcılık tespit etti."
+  },
+  "Guarantee": {
+    "en": "The product comes with a guarantee.",
+    "tr": "Ürün garantiyle birlikte geliyor."
+  },
+  "Inflation": {
+    "en": "Inflation reduces purchasing power.",
+    "tr": "Enflasyon satın alma gücünü azaltır."
+  },
+  "Insurance": {
+    "en": "The car has insurance.",
+    "tr": "Arabanın sigortası var."
+  },
+  "Interest": {
+    "en": "The bank pays interest on savings.",
+    "tr": "Banka tasarruflara faiz ödüyor."
+  },
+  "Investment": {
+    "en": "This investment carries some risk.",
+    "tr": "Bu yatırım bir miktar risk taşıyor."
+  },
+  "Invoice": {
+    "en": "Please send the invoice by email.",
+    "tr": "Lütfen faturayı e-postayla gönder."
+  },
+  "Liability": {
+    "en": "The unpaid bill is a liability.",
+    "tr": "Ödenmemiş fatura bir yükümlülüktür."
+  },
+  "Liquidity": {
+    "en": "The bank needs sufficient liquidity.",
+    "tr": "Bankanın yeterli likiditeye ihtiyacı var."
+  },
+  "Loan": {
+    "en": "She applied for a loan.",
+    "tr": "Kredi başvurusunda bulundu."
+  },
+  "Margin": {
+    "en": "Our profit margin is ten percent.",
+    "tr": "Kâr marjımız yüzde on."
+  },
+  "Market": {
+    "en": "The market is changing rapidly.",
+    "tr": "Piyasa hızla değişiyor."
+  },
+  "Mortgage": {
+    "en": "They took out a mortgage to buy a house.",
+    "tr": "Ev almak için ipotekli konut kredisi kullandılar."
+  },
+  "Payment": {
+    "en": "The payment is due tomorrow.",
+    "tr": "Ödemenin vadesi yarın."
+  },
+  "Portfolio": {
+    "en": "His portfolio includes stocks and bonds.",
+    "tr": "Portföyünde hisse senetleri ve tahviller var."
+  },
+  "Profit": {
+    "en": "The company made a profit.",
+    "tr": "Şirket kâr etti."
+  },
+  "Revenue": {
+    "en": "Annual revenue increased this year.",
+    "tr": "Yıllık gelir bu yıl arttı."
+  },
+  "Risk": {
+    "en": "Every investment involves risk.",
+    "tr": "Her yatırım risk içerir."
+  },
+  "Salary": {
+    "en": "My salary is paid monthly.",
+    "tr": "Maaşım aylık ödeniyor."
+  },
+  "Savings": {
+    "en": "She keeps her savings in a bank.",
+    "tr": "Tasarruflarını bir bankada tutuyor."
+  },
+  "Share": {
+    "en": "I bought a share in the company.",
+    "tr": "Şirketten bir hisse satın aldım."
+  },
+  "Stock": {
+    "en": "This stock rose in value.",
+    "tr": "Bu hisse senedinin değeri arttı."
+  },
+  "Transaction": {
+    "en": "The transaction was completed successfully.",
+    "tr": "İşlem başarıyla tamamlandı."
+  },
+  "Abundant": {
+    "en": "Water is abundant in this region.",
+    "tr": "Bu bölgede su bol."
+  },
+  "Accurate": {
+    "en": "The information is accurate.",
+    "tr": "Bilgi doğru."
+  },
+  "Adequate": {
+    "en": "We have adequate resources.",
+    "tr": "Yeterli kaynağımız var."
+  },
+  "Adverse": {
+    "en": "The weather had an adverse effect on production.",
+    "tr": "Hava koşulları üretimi olumsuz etkiledi."
+  },
+  "Ambiguous": {
+    "en": "The instructions are ambiguous.",
+    "tr": "Talimatlar belirsiz."
+  },
+  "Appropriate": {
+    "en": "Please choose an appropriate solution.",
+    "tr": "Lütfen uygun bir çözüm seç."
+  },
+  "Authentic": {
+    "en": "The signature is authentic.",
+    "tr": "İmza gerçek."
+  },
+  "Beneficial": {
+    "en": "Regular exercise is beneficial.",
+    "tr": "Düzenli egzersiz faydalıdır."
+  },
+  "Capable": {
+    "en": "She is capable of managing the project.",
+    "tr": "Projeyi yönetebilecek yetenekte."
+  },
+  "Coherent": {
+    "en": "We need a coherent plan.",
+    "tr": "Tutarlı bir plana ihtiyacımız var."
+  },
+  "Comprehensive": {
+    "en": "The report provides a comprehensive analysis.",
+    "tr": "Rapor kapsamlı bir analiz sunuyor."
+  },
+  "Crucial": {
+    "en": "Timing is crucial for success.",
+    "tr": "Başarı için zamanlama hayati önem taşır."
+  },
+  "Durable": {
+    "en": "This material is durable.",
+    "tr": "Bu malzeme dayanıklı."
+  },
+  "Ethical": {
+    "en": "We must make ethical decisions.",
+    "tr": "Etik kararlar vermeliyiz."
+  },
+  "Evident": {
+    "en": "The improvement is evident.",
+    "tr": "İyileşme açıkça görülüyor."
+  },
+  "Excessive": {
+    "en": "Excessive spending can cause problems.",
+    "tr": "Aşırı harcama sorunlara yol açabilir."
+  },
+  "Feasible": {
+    "en": "The plan is feasible.",
+    "tr": "Plan uygulanabilir."
+  },
+  "Flexible": {
+    "en": "Our schedule is flexible.",
+    "tr": "Programımız esnek."
+  },
+  "Fundamental": {
+    "en": "Trust is fundamental to teamwork.",
+    "tr": "Güven, ekip çalışmasının temelidir."
+  },
+  "Inevitable": {
+    "en": "Some changes are inevitable.",
+    "tr": "Bazı değişiklikler kaçınılmazdır."
+  },
+  "Innovative": {
+    "en": "They developed an innovative solution.",
+    "tr": "Yenilikçi bir çözüm geliştirdiler."
+  },
+  "Legitimate": {
+    "en": "This is a legitimate business.",
+    "tr": "Bu yasal bir işletmedir."
+  },
+  "Mandatory": {
+    "en": "Safety training is mandatory.",
+    "tr": "Güvenlik eğitimi zorunludur."
+  },
+  "Reliable": {
+    "en": "We need reliable information.",
+    "tr": "Güvenilir bilgiye ihtiyacımız var."
+  },
+  "Resilient": {
+    "en": "The economy remained resilient during the crisis.",
+    "tr": "Ekonomi kriz sırasında dayanıklılığını korudu."
+  },
+  "Significant": {
+    "en": "There was a significant increase in sales.",
+    "tr": "Satışlarda önemli bir artış oldu."
+  },
+  "Sustainable": {
+    "en": "We need sustainable growth.",
+    "tr": "Sürdürülebilir büyümeye ihtiyacımız var."
+  },
+  "Valid": {
+    "en": "Your ticket is valid until Friday.",
+    "tr": "Biletin cumaya kadar geçerli."
+  },
+  "Vulnerable": {
+    "en": "Small companies are vulnerable to sudden price changes.",
+    "tr": "Küçük şirketler ani fiyat değişimlerine karşı savunmasızdır."
+  },
+  "Accordingly": {
+    "en": "Costs rose; accordingly, we increased prices.",
+    "tr": "Maliyetler arttı; buna bağlı olarak fiyatları artırdık."
+  },
+  "Approximately": {
+    "en": "The journey takes approximately two hours.",
+    "tr": "Yolculuk yaklaşık iki saat sürüyor."
+  },
+  "Clearly": {
+    "en": "Please speak clearly.",
+    "tr": "Lütfen açıkça konuş."
+  },
+  "Consistently": {
+    "en": "She consistently meets her targets.",
+    "tr": "Hedeflerini istikrarlı biçimde tutturuyor."
+  },
+  "Continuously": {
+    "en": "The machine runs continuously.",
+    "tr": "Makine sürekli çalışıyor."
+  },
+  "Currently": {
+    "en": "I am currently working on a report.",
+    "tr": "Şu anda bir rapor üzerinde çalışıyorum."
+  },
+  "Effectively": {
+    "en": "This method solves the problem effectively.",
+    "tr": "Bu yöntem sorunu etkili biçimde çözüyor."
+  },
+  "Eventually": {
+    "en": "We eventually found a solution.",
+    "tr": "Sonunda bir çözüm bulduk."
+  },
+  "Frequently": {
+    "en": "He frequently checks his email.",
+    "tr": "E-postasını sık sık kontrol ediyor."
+  },
+  "Fundamentally": {
+    "en": "The two systems are fundamentally different.",
+    "tr": "İki sistem temelde farklı."
+  },
+  "Gradually": {
+    "en": "Prices are gradually rising.",
+    "tr": "Fiyatlar aşamalı olarak yükseliyor."
+  },
+  "Immediately": {
+    "en": "Please call me immediately.",
+    "tr": "Lütfen beni hemen ara."
+  },
+  "Increasingly": {
+    "en": "Customers are increasingly using online banking.",
+    "tr": "Müşteriler giderek daha fazla internet bankacılığı kullanıyor."
+  },
+  "Initially": {
+    "en": "Initially, I did not understand the question.",
+    "tr": "İlk başta soruyu anlamadım."
+  },
+  "Largely": {
+    "en": "The result depends largely on demand.",
+    "tr": "Sonuç büyük ölçüde talebe bağlı."
+  },
+  "Mainly": {
+    "en": "The company mainly sells software.",
+    "tr": "Şirket ağırlıklı olarak yazılım satıyor."
+  },
+  "Moreover": {
+    "en": "The plan is affordable; moreover, it is easy to implement.",
+    "tr": "Plan uygun maliyetli; üstelik uygulanması da kolay."
+  },
+  "Particularly": {
+    "en": "This tool is particularly useful for beginners.",
+    "tr": "Bu araç özellikle yeni başlayanlar için faydalı."
+  },
+  "Precisely": {
+    "en": "The meeting starts precisely at ten.",
+    "tr": "Toplantı tam saat onda başlıyor."
+  },
+  "Primarily": {
+    "en": "The course is primarily designed for beginners.",
+    "tr": "Kurs öncelikle yeni başlayanlar için tasarlanmış."
+  },
+  "Significantly": {
+    "en": "Sales increased significantly.",
+    "tr": "Satışlar önemli ölçüde arttı."
+  },
+  "Subsequently": {
+    "en": "He completed the course and subsequently found a job.",
+    "tr": "Kursu tamamladı ve sonrasında bir iş buldu."
+  },
+  "Ultimately": {
+    "en": "Ultimately, the decision is yours.",
+    "tr": "Nihayetinde karar senin."
+  },
+  "Account for": {
+    "en": "Can you account for the missing money?",
+    "tr": "Eksik parayı açıklayabilir misin?"
+  },
+  "Back up": {
+    "en": "The data can back up your argument.",
+    "tr": "Veriler savını destekleyebilir."
+  },
+  "Break down": {
+    "en": "Old machines may break down.",
+    "tr": "Eski makineler bozulabilir."
+  },
+  "Carry out": {
+    "en": "We will carry out the inspection tomorrow.",
+    "tr": "Denetimi yarın gerçekleştireceğiz."
+  },
+  "Deal with": {
+    "en": "We need to deal with this complaint.",
+    "tr": "Bu şikâyeti ele almamız gerekiyor."
+  },
+  "Figure out": {
+    "en": "Can you figure out the answer?",
+    "tr": "Cevabı bulabilir misin?"
+  },
+  "Give up": {
+    "en": "Do not give up when it gets difficult.",
+    "tr": "İşler zorlaştığında vazgeçme."
+  },
+  "Keep up with": {
+    "en": "We must keep up with new technology.",
+    "tr": "Yeni teknolojiye ayak uydurmalıyız."
+  },
+  "Look into": {
+    "en": "We will look into the problem.",
+    "tr": "Sorunu araştıracağız."
+  },
+  "Make up for": {
+    "en": "Extra practice can make up for lost time.",
+    "tr": "Ek pratik, kaybedilen zamanı telafi edebilir."
+  },
+  "Put forward": {
+    "en": "You can put forward a new idea.",
+    "tr": "Yeni bir fikir öne sürebilirsin."
+  },
+  "Run out of": {
+    "en": "We may run out of paper.",
+    "tr": "Kâğıdımız bitebilir."
+  },
+  "Set up": {
+    "en": "They will set up a new office.",
+    "tr": "Yeni bir ofis kuracaklar."
+  },
+  "Stand out": {
+    "en": "A clear design can stand out.",
+    "tr": "Anlaşılır bir tasarım dikkat çekebilir."
+  },
+  "Take over": {
+    "en": "The new manager will take over next week.",
+    "tr": "Yeni müdür gelecek hafta yönetimi devralacak."
+  },
+  "Make a decision": {
+    "en": "We need to make a decision today.",
+    "tr": "Bugün bir karar vermemiz gerekiyor."
+  },
+  "Take responsibility": {
+    "en": "You should take responsibility for your actions.",
+    "tr": "Davranışlarının sorumluluğunu almalısın."
+  },
+  "Reach an agreement": {
+    "en": "Both sides hope to reach an agreement.",
+    "tr": "İki taraf da anlaşmaya varmayı umuyor."
+  },
+  "Face a challenge": {
+    "en": "We may face a challenge during the project.",
+    "tr": "Proje sırasında bir zorlukla karşılaşabiliriz."
+  },
+  "Gain access": {
+    "en": "Employees can gain access with their ID cards.",
+    "tr": "Çalışanlar kimlik kartlarıyla erişim sağlayabilir."
+  },
+  "Have an impact": {
+    "en": "Small changes can have an impact on costs.",
+    "tr": "Küçük değişiklikler maliyetleri etkileyebilir."
+  },
+  "Meet the deadline": {
+    "en": "We must meet the deadline.",
+    "tr": "İşi son tarihe kadar bitirmeliyiz."
+  },
+  "Pay attention": {
+    "en": "Please pay attention to the instructions.",
+    "tr": "Lütfen talimatlara dikkat et."
+  },
+  "Raise awareness": {
+    "en": "The campaign aims to raise awareness.",
+    "tr": "Kampanya farkındalık yaratmayı amaçlıyor."
+  },
+  "Reduce costs": {
+    "en": "Automation can reduce costs.",
+    "tr": "Otomasyon maliyetleri düşürebilir."
+  },
+  "Take action": {
+    "en": "We need to take action now.",
+    "tr": "Şimdi harekete geçmemiz gerekiyor."
+  },
+  "Build trust": {
+    "en": "Honest communication helps build trust.",
+    "tr": "Dürüst iletişim güven oluşturmaya yardımcı olur."
+  },
+  "Maintain stability": {
+    "en": "The policy aims to maintain stability.",
+    "tr": "Politika istikrarı korumayı amaçlıyor."
+  }
+};
+
+function escapeHTML(text){
+  return String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderExample(word){
+  const example = EXAMPLES[word.word];
+  if(!example) return '';
+  const start = example.en.toLowerCase().indexOf(word.word.toLowerCase());
+  const end = start + word.word.length;
+  const sentence = start < 0 ? escapeHTML(example.en)
+    : escapeHTML(example.en.slice(0,start)) + '<mark>' + escapeHTML(example.en.slice(start,end)) + '</mark>' + escapeHTML(example.en.slice(end));
+  return `<div class="teach-example">
+    <div class="teach-example-label">Örnek cümle</div>
+    <p class="teach-example-en" lang="en">${sentence}</p>
+    <p class="teach-example-tr" lang="tr">${escapeHTML(example.tr)}</p>
+  </div>`;
 }
 
 // ===== STATE =====
@@ -517,6 +1509,7 @@ function renderTeach(app){
       <div style="margin-bottom:10px">${badge(word.type)}<div class="teach-word">${word.word}</div></div>
       <div class="teach-tr">${meaning}</div>
       <div class="teach-syn">Synonym: ${word.synonym}</div>
+      ${renderExample(word)}
       <div class="teach-tip">${memTip(word.word,meaning,word.synonym)}</div>
     </div>
     <div class="nav-dots">${dots}</div>
@@ -592,4 +1585,5 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
