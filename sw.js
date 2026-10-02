@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kelime-quiz-v2';
+const CACHE_NAME = 'kelime-quiz-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -22,15 +22,18 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
+// Fetch page navigations from the network so published changes do not stay hidden.
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
-  event.respondWith(
-    caches.match(event.request).then(cached =>
-      cached || fetch(event.request).then(response => {
+  if (event.request.mode === 'navigate') {
+    event.respondWith(fetch(event.request).then(response => {
+      if (response.ok) {
         const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-        return response;
-      }).catch(() => caches.match('./index.html'))
-    )
-  );
+        event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)));
+      }
+      return response;
+    }).catch(async () => (await caches.match(event.request)) || caches.match('./index.html')));
+    return;
+  }
+  event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request)));
 });

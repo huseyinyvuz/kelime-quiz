@@ -268,6 +268,23 @@
     .list-item { align-items:flex-start; flex-direction:column; }
     .list-tr { text-align:left; }
   }
+
+  .practice-controls { display:grid; gap:8px; margin-bottom:14px; }
+  .practice-controls label,.session-label,.screen-note { font-size:0.78rem; color:var(--muted); line-height:1.6; }
+  .screen-note { margin:10px 0 14px; }
+  .session-label { margin-bottom:10px; }
+  .practice-controls select { width:100%; min-height:44px; background:var(--card2); color:var(--text); border:1px solid var(--border); border-radius:12px; padding:10px; font:inherit; }
+  .cloze-sentence { font-family:'Lora',serif; font-size:1.3rem; line-height:1.6; overflow-wrap:anywhere; }
+  .cloze-gap { color:var(--yellow); white-space:nowrap; }
+  .mistake-card { background:var(--card); border:1px solid var(--border); border-radius:12px; margin-bottom:10px; overflow:hidden; }
+  .mistake-card summary { cursor:pointer; padding:14px; min-height:48px; overflow-wrap:anywhere; }
+  .mistake-card summary span { display:block; margin-top:5px; color:var(--yellow); font-size:0.8rem; }
+  .mistake-body { padding:0 14px 14px; }
+  .section-title { margin:20px 0 10px; font-size:1rem; }
+  .progress-table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+  .progress-table th,.progress-table td { padding:10px 5px; text-align:left; border-bottom:1px solid var(--border); }
+  .tab { min-width:0; font-size:0.7rem; }
+
 </style>
 </head>
 <body>
@@ -276,8 +293,10 @@
 <p class="subtitle">Bankacilik Ingilizce Kelime Havuzu</p>
 
 <div class="tabs">
-  <button class="tab active" onclick="switchTab('quiz')">Quiz</button>
-  <button class="tab"        onclick="switchTab('learned')">Ogrendiklerim</button>
+  <button class="tab active" data-tab="quiz" onclick="switchTab('quiz')">Quiz</button>
+  <button class="tab" data-tab="learned" onclick="switchTab('learned')">Öğrendiklerim</button>
+  <button class="tab" data-tab="mistakes" onclick="switchTab('mistakes')">Yanlışlarım</button>
+  <button class="tab" data-tab="progress" onclick="switchTab('progress')">İlerlemem</button>
 </div>
 
 <div id="app"></div>
@@ -1572,9 +1591,196 @@ function clearLearned(){
   }
 }
 
+// Persistent practice history and calendar-day spaced repetition.
+const REVIEW_DAYS = [1, 3, 7];
+let practice = { version: 1, words: {}, days: {} };
+S.mode = 'meaning';
+S.session = 'new';
+S.sessionCorrect = 0;
+S.sessionAnswers = 0;
+
+function dayKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+function addDays(key, days) {
+  const [y,m,d] = key.split('-').map(Number);
+  return dayKey(new Date(y,m-1,d+days,12));
+}
+function savePractice() {
+  try { localStorage.setItem('kl_practice_v1',JSON.stringify(practice)); } catch(e) {}
+}
+function loadPractice() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('kl_practice_v1') || 'null');
+    if(raw && raw.version===1 && raw.words && raw.days) {
+      const validIDs = new Set(S.allWords.map(w=>String(w.id)));
+      for(const [id,r] of Object.entries(raw.words)) {
+        if(validIDs.has(id) && r && Number.isInteger(r.stage) && r.stage>=0 && r.stage<=3 && /^\d{4}-\d{2}-\d{2}$/.test(r.due)) practice.words[id]=r;
+      }
+      for(const [key,r] of Object.entries(raw.days)) {
+        if(/^\d{4}-\d{2}-\d{2}$/.test(key) && r && Number.isFinite(r.total) && Number.isFinite(r.correct) && r.total>=0 && r.correct>=0 && r.correct<=r.total) practice.days[key]=r;
+      }
+    }
+  } catch(e) {}
+  // Existing learned words are eligible for review tomorrow, without invented statistics.
+  for(const w of S.learnedWords) {
+    if(S.allWords.some(a=>a.id===w.id) && !practice.words[w.id]) practice.words[w.id]={stage:0,due:addDays(dayKey(),1),correct:0,wrong:0,last:null};
+  }
+  savePractice();
+}
+function dueWords() {
+  const today=dayKey();
+  return S.allWords.filter(w=>practice.words[w.id] && practice.words[w.id].due<=today)
+    .sort((a,b)=>practice.words[a.id].due.localeCompare(practice.words[b.id].due));
+}
+function recordPractice(word, ok) {
+  const today=dayKey();
+  const r=practice.words[word.id] || {stage:0,correct:0,wrong:0,last:null,due:today};
+  if(ok) {
+    r.correct++;
+    // Same-day corrective tests do not skip scheduled repetition intervals.
+    if(r.last!==today) r.stage=Math.min(r.stage+1,3);
+  } else {
+    r.wrong++;
+    r.stage=0;
+  }
+  r.last=today;
+  r.due=addDays(today,REVIEW_DAYS[Math.max(0,r.stage-1)]);
+  practice.words[word.id]=r;
+  const day=practice.days[today] || {total:0,correct:0};
+  day.total++;
+  if(ok) day.correct++;
+  practice.days[today]=day;
+  S.sessionAnswers++;
+  if(ok) S.sessionCorrect++;
+  savePractice();
+}
+
+function modeControls() {
+  return `<div class="practice-controls">
+    <label for="practice-mode">Soru türü</label>
+    <select id="practice-mode" onchange="changeMode(this.value)">
+      <option value="meaning" ${S.mode==='meaning'?'selected':''}>Türkçe anlamı bul</option>
+      <option value="cloze" ${S.mode==='cloze'?'selected':''}>Cümlede boşluk doldur</option>
+    </select>
+    <button class="btn-full secondary" onclick="startReview()">Zamanı gelen tekrarlar (${dueWords().length})</button>
+  </div>`;
+}
+function changeMode(mode) {
+  if(!['meaning','cloze'].includes(mode)) return;
+  S.mode=mode;
+  render();
+}
+function clozeSentence(word) {
+  const ex=EXAMPLES[word.word];
+  if(!ex) return escapeHTML(word.word);
+  const start=ex.en.toLowerCase().indexOf(word.word.toLowerCase());
+  if(start<0) return escapeHTML(ex.en);
+  return escapeHTML(ex.en.slice(0,start))+'<span class="cloze-gap" aria-label="Boşluk">_____</span>'+escapeHTML(ex.en.slice(start+word.word.length));
+}
+const originalStartQuiz=startNewQuiz;
+startNewQuiz=function() {
+  S.session='new'; S.sessionAnswers=0; S.sessionCorrect=0;
+  S.tab='quiz'; syncTabs(); originalStartQuiz();
+};
+function beginPractice(words, session) {
+  S.session=session; S.sessionAnswers=0; S.sessionCorrect=0;
+  S.quiz=shuffle(words).slice(0,10); S.idx=0; S.unknowns=[]; S.phase='quiz';
+  S.tab='quiz'; syncTabs(); buildChoices(); render();
+}
+function startReview() {
+  const words=dueWords();
+  if(!words.length) {
+    S.tab='quiz'; syncTabs();
+    document.getElementById('app').innerHTML=modeControls()+`<div class="empty-state">Bugün zamanı gelen tekrar yok.<br>Yeni kelimelerle çalışmaya devam edebilirsin.</div><button class="btn-full" onclick="startNewQuiz()">Yeni Tur Başlat</button>`;
+    return;
+  }
+  beginPractice(words,'review');
+}
+function practiceMistakes() {
+  const words=S.allWords.filter(w=>(practice.words[w.id]?.wrong || 0)>0);
+  if(words.length) beginPractice(words,'mistakes');
+}
+pick=function(i) {
+  if(S.answered || !Number.isInteger(i) || i<0 || i>=S.choices.length) return;
+  S.selected=i; S.answered=true;
+  const word=S.quiz[S.idx], ok=i===S.correctPos;
+  if(ok) {
+    if(!S.learnedWords.some(w=>w.id===word.id)) S.learnedWords.push(word);
+  } else {
+    S.unknowns.push(word);
+  }
+  recordPractice(word,ok); save(); render();
+};
+function syncTabs() {
+  document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.tab===S.tab));
+}
+switchTab=function(t) {S.tab=t; syncTabs(); render();};
+const originalRender=render;
+render=function() {
+  const app=document.getElementById('app');
+  if(S.tab==='mistakes') {renderMistakes(app); return;}
+  if(S.tab==='progress') {renderProgress(app); return;}
+  originalRender();
+};
+const originalRenderQuiz=renderQuiz;
+renderQuiz=function(app) {
+  originalRenderQuiz(app);
+  if(!S.quiz[S.idx]) return;
+  const word=S.quiz[S.idx];
+  if(S.mode==='cloze') {
+    const card=app.querySelector('.quiz-card');
+    card.innerHTML=`${badge(word.type)}<div class="cloze-sentence" lang="en">${clozeSentence(word)}</div><div class="quiz-label">Boşluğa uygun İngilizce kelimeyi seç</div>`;
+    app.querySelectorAll('.choice-text').forEach((el,i)=>{el.textContent=S.choices[i].word;});
+    if(S.answered) {
+      const answer=document.createElement('div');
+      answer.className='teach-card';
+      answer.innerHTML=`<div class="teach-tr">${escapeHTML(word.word)} — ${escapeHTML(trOf(word))}</div>${renderExample(word)}`;
+      app.querySelector('.choices').after(answer);
+    }
+  }
+  app.insertAdjacentHTML('afterbegin',modeControls()+`<p class="session-label">${S.session==='review'?'Aralıklı tekrar':S.session==='mistakes'?'Yanlışlarım tekrarı':'Yeni kelimeler'}</p>`);
+};
+const originalRenderResult=renderResult;
+renderResult=function(app) {
+  originalRenderResult(app);
+  app.insertAdjacentHTML('afterbegin',modeControls());
+  if(S.sessionAnswers) app.insertAdjacentHTML('beforeend',`<div class="teach-tip">Bu oturum: ${S.sessionCorrect} / ${S.sessionAnswers} doğru cevap. Tekrar denemeleri dahildir.</div>`);
+};
+function dueLabel(key) {
+  const [y,m,d]=key.split('-'); return `${d}.${m}.${y}`;
+}
+function renderMistakes(app) {
+  const words=S.allWords.filter(w=>(practice.words[w.id]?.wrong || 0)>0)
+    .sort((a,b)=>practice.words[b.id].wrong-practice.words[a.id].wrong);
+  app.innerHTML=`<div class="list-header"><h2>Yanlışlarım</h2><span class="list-count">${words.length} kelime</span></div>
+    <p class="screen-note">Yanlış yaptığın kelimeler burada kalır. Doğru cevaplasan da tekrar inceleyebilirsin.</p>
+    ${words.length?'<button class="btn-full" onclick="practiceMistakes()">Yanlışları Test Et</button>':'<div class="empty-state">Henüz kaydedilmiş yanlış cevap yok. Yeni yanlışların burada görünecek.</div>'}
+    ${words.map(w=>{const r=practice.words[w.id]; return `<details class="mistake-card"><summary><strong>${escapeHTML(w.word)}</strong><span>${r.wrong} yanlış · ${escapeHTML(trOf(w))}</span></summary><div class="mistake-body"><div class="teach-syn">Eş anlamlı: ${escapeHTML(w.synonym)}</div>${renderExample(w)}<p class="screen-note">Sonraki tekrar: ${dueLabel(r.due)}${r.due<=dayKey()?' · Zamanı geldi':''}</p></div></details>`;}).join('')}`;
+}
+function streakCount() {
+  let key=dayKey(), count=0;
+  if(!practice.days[key]?.total) key=addDays(key,-1);
+  while(practice.days[key]?.total) {count++; key=addDays(key,-1);}
+  return count;
+}
+function renderProgress(app) {
+  const today=practice.days[dayKey()] || {total:0,correct:0};
+  const hard=S.allWords.filter(w=>practice.words[w.id]?.wrong>0).sort((a,b)=>practice.words[b.id].wrong-practice.words[a.id].wrong).slice(0,5);
+  const days=Array.from({length:7},(_,i)=>addDays(dayKey(),i-6));
+  app.innerHTML=`<div class="list-header"><h2>İlerlemem</h2></div>
+    <div class="result-stats"><div class="stat-box g"><div class="stat-num">${today.total?Math.round(today.correct/today.total*100)+'%':'—'}</div><div class="stat-label">Bugünkü doğru oranı</div></div><div class="stat-box"><div class="stat-num">${today.total}</div><div class="stat-label">Bugünkü cevap sayısı</div></div><div class="stat-box"><div class="stat-num">${streakCount()}</div><div class="stat-label">Günlük çalışma serisi</div></div></div>
+    <p class="screen-note">Her cevap sayılır; aynı kelimenin tekrar denemeleri de dahildir. İstatistikler bu tarayıcıda saklanır. Eski çalışmaların cevap geçmişi bulunmadığından oranlara eklenmez.</p>
+    <button class="btn-full" onclick="startReview()">Zamanı Gelenleri Tekrarla (${dueWords().length})</button>
+    <div class="teach-tip">Doğru cevaplardan sonra tekrar aralıkları: 1, 3 ve 7 gün. Sonrasında 7 günde bir. Yanlış cevap aralığı 1 güne döndürür; aynı gün yeniden doğru cevaplamak bir aşamayı atlatmaz.</div>
+    <h3 class="section-title">Son 7 gün</h3><table class="progress-table"><thead><tr><th scope="col">Gün</th><th scope="col">Doğru / Cevap</th><th scope="col">Oran</th></tr></thead><tbody>${days.map(key=>{const r=practice.days[key] || {total:0,correct:0};return `<tr><td>${dueLabel(key)}</td><td>${r.correct} / ${r.total}</td><td>${r.total?Math.round(r.correct/r.total*100)+'%':'—'}</td></tr>`;}).join('')}</tbody></table>
+    <h3 class="section-title">En çok zorlandıklarım</h3>${hard.length?hard.map(w=>`<div class="list-item"><span class="list-word">${escapeHTML(w.word)}</span><span class="list-tr">${practice.words[w.id].wrong} yanlış</span></div>`).join(''):'<p class="screen-note">Yanlış cevapların oldukça burada görünecek.</p>'}`;
+}
+
 // ===== INIT =====
 S.allWords=RAW.map((r,i)=>({id:i,word:r[0],synonym:r[1],tr:r[2],type:r[3]}));
 load();
+loadPractice();
 startNewQuiz();
 
 if ('serviceWorker' in navigator) {
