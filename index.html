@@ -285,6 +285,19 @@
   .progress-table th,.progress-table td { padding:10px 5px; text-align:left; border-bottom:1px solid var(--border); }
   .tab { min-width:0; font-size:0.7rem; }
 
+
+  .word-family { margin-top:14px; padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--card2); }
+  .word-family h3 { font-size:0.85rem; color:var(--accent2); margin-bottom:8px; }
+  .family-base { font-size:0.8rem; line-height:1.5; color:#b0b8d8; margin-bottom:10px; }
+  .family-base strong { color:var(--yellow); }
+  .family-list { list-style:none; }
+  .family-list li { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:4px 12px; padding:8px 0; border-top:1px solid var(--border); font-size:0.85rem; overflow-wrap:anywhere; }
+  .family-list li>span { min-width:0; }
+  .family-type { display:inline-block; font-size:0.68rem; color:var(--muted); margin-left:7px; }
+  .family-meaning { color:#b0b8d8; }
+  .family-current strong { color:var(--yellow); }
+  .family-note { font-size:0.7rem; color:var(--muted); margin-top:8px; line-height:1.5; }
+
 </style>
 </head>
 <body>
@@ -1529,6 +1542,7 @@ function renderTeach(app){
       <div class="teach-tr">${meaning}</div>
       <div class="teach-syn">Synonym: ${word.synonym}</div>
       ${renderExample(word)}
+      ${renderWordFamily(word)}
       <div class="teach-tip">${memTip(word.word,meaning,word.synonym)}</div>
     </div>
     <div class="nav-dots">${dots}</div>
@@ -1589,6 +1603,2782 @@ function clearLearned(){
   if(confirm('Listeyi sifirlamak istedigine emin misin?')){
     S.learnedWords=[]; S.usedWords=new Set(); save(); render();
   }
+}
+
+// Word families show related forms, not a proposed etymological root.
+const WORD_FAMILIES = [
+  [
+    {
+      "word": "abandon",
+      "type": "V",
+      "tr": "terk etmek"
+    },
+    {
+      "word": "abandonment",
+      "type": "N",
+      "tr": "terk etme"
+    }
+  ],
+  [
+    {
+      "word": "abolish",
+      "type": "V",
+      "tr": "yürürlükten kaldırmak"
+    },
+    {
+      "word": "abolition",
+      "type": "N",
+      "tr": "yürürlükten kaldırma"
+    }
+  ],
+  [
+    {
+      "word": "accelerate",
+      "type": "V",
+      "tr": "hızlandırmak"
+    },
+    {
+      "word": "acceleration",
+      "type": "N",
+      "tr": "hızlanma"
+    }
+  ],
+  [
+    {
+      "word": "acknowledge",
+      "type": "V",
+      "tr": "kabul etmek"
+    },
+    {
+      "word": "acknowledgement",
+      "type": "N",
+      "tr": "kabul, teşekkür"
+    }
+  ],
+  [
+    {
+      "word": "acquire",
+      "type": "V",
+      "tr": "edinmek"
+    },
+    {
+      "word": "acquisition",
+      "type": "N",
+      "tr": "edinme, satın alma"
+    }
+  ],
+  [
+    {
+      "word": "adapt",
+      "type": "V",
+      "tr": "uyarlamak"
+    },
+    {
+      "word": "adaptation",
+      "type": "N",
+      "tr": "uyarlama"
+    },
+    {
+      "word": "adaptable",
+      "type": "Adj",
+      "tr": "uyum sağlayabilen"
+    }
+  ],
+  [
+    {
+      "word": "address",
+      "type": "V",
+      "tr": "ele almak"
+    },
+    {
+      "word": "addressable",
+      "type": "Adj",
+      "tr": "ele alınabilir"
+    }
+  ],
+  [
+    {
+      "word": "advocate",
+      "type": "V",
+      "tr": "savunmak"
+    },
+    {
+      "word": "advocacy",
+      "type": "N",
+      "tr": "savunuculuk"
+    }
+  ],
+  [
+    {
+      "word": "alter",
+      "type": "V",
+      "tr": "değiştirmek"
+    },
+    {
+      "word": "alteration",
+      "type": "N",
+      "tr": "değişiklik"
+    }
+  ],
+  [
+    {
+      "word": "anticipate",
+      "type": "V",
+      "tr": "öngörmek"
+    },
+    {
+      "word": "anticipation",
+      "type": "N",
+      "tr": "beklenti, öngörü"
+    }
+  ],
+  [
+    {
+      "word": "approve",
+      "type": "V",
+      "tr": "onaylamak"
+    },
+    {
+      "word": "approval",
+      "type": "N",
+      "tr": "onay"
+    },
+    {
+      "word": "disapprove",
+      "type": "V",
+      "tr": "uygun bulmamak"
+    }
+  ],
+  [
+    {
+      "word": "argue",
+      "type": "V",
+      "tr": "tartışmak"
+    },
+    {
+      "word": "argument",
+      "type": "N",
+      "tr": "tartışma, sav"
+    },
+    {
+      "word": "arguable",
+      "type": "Adj",
+      "tr": "tartışmaya açık"
+    }
+  ],
+  [
+    {
+      "word": "assess",
+      "type": "V",
+      "tr": "değerlendirmek"
+    },
+    {
+      "word": "assessment",
+      "type": "N",
+      "tr": "değerlendirme"
+    }
+  ],
+  [
+    {
+      "word": "assign",
+      "type": "V",
+      "tr": "atamak"
+    },
+    {
+      "word": "assignment",
+      "type": "N",
+      "tr": "görev, atama"
+    }
+  ],
+  [
+    {
+      "word": "assume",
+      "type": "V",
+      "tr": "varsaymak"
+    },
+    {
+      "word": "assumption",
+      "type": "N",
+      "tr": "varsayım"
+    }
+  ],
+  [
+    {
+      "word": "attain",
+      "type": "V",
+      "tr": "ulaşmak"
+    },
+    {
+      "word": "attainment",
+      "type": "N",
+      "tr": "ulaşma, elde etme"
+    },
+    {
+      "word": "attainable",
+      "type": "Adj",
+      "tr": "ulaşılabilir"
+    }
+  ],
+  [
+    {
+      "word": "avoid",
+      "type": "V",
+      "tr": "kaçınmak"
+    },
+    {
+      "word": "avoidance",
+      "type": "N",
+      "tr": "kaçınma"
+    },
+    {
+      "word": "avoidable",
+      "type": "Adj",
+      "tr": "önlenebilir"
+    }
+  ],
+  [
+    {
+      "word": "balance",
+      "type": "N",
+      "tr": "denge"
+    },
+    {
+      "word": "balanced",
+      "type": "Adj",
+      "tr": "dengeli"
+    },
+    {
+      "word": "imbalance",
+      "type": "N",
+      "tr": "dengesizlik"
+    }
+  ],
+  [
+    {
+      "word": "boost",
+      "type": "V",
+      "tr": "artırmak"
+    },
+    {
+      "word": "booster",
+      "type": "N",
+      "tr": "artırıcı, güçlendirici"
+    }
+  ],
+  [
+    {
+      "word": "cease",
+      "type": "V",
+      "tr": "durmak, durdurmak"
+    },
+    {
+      "word": "cessation",
+      "type": "N",
+      "tr": "sona erme"
+    },
+    {
+      "word": "ceaseless",
+      "type": "Adj",
+      "tr": "aralıksız"
+    }
+  ],
+  [
+    {
+      "word": "claim",
+      "type": "V",
+      "tr": "iddia etmek, talep etmek"
+    },
+    {
+      "word": "claimant",
+      "type": "N",
+      "tr": "hak talep eden kişi"
+    }
+  ],
+  [
+    {
+      "word": "clarify",
+      "type": "V",
+      "tr": "açıklığa kavuşturmak"
+    },
+    {
+      "word": "clarification",
+      "type": "N",
+      "tr": "açıklığa kavuşturma"
+    }
+  ],
+  [
+    {
+      "word": "commence",
+      "type": "V",
+      "tr": "başlamak"
+    },
+    {
+      "word": "commencement",
+      "type": "N",
+      "tr": "başlangıç"
+    }
+  ],
+  [
+    {
+      "word": "commit",
+      "type": "V",
+      "tr": "adamak, taahhüt etmek"
+    },
+    {
+      "word": "commitment",
+      "type": "N",
+      "tr": "bağlılık, taahhüt"
+    },
+    {
+      "word": "committed",
+      "type": "Adj",
+      "tr": "kendini adamış"
+    }
+  ],
+  [
+    {
+      "word": "compare",
+      "type": "V",
+      "tr": "karşılaştırmak"
+    },
+    {
+      "word": "comparison",
+      "type": "N",
+      "tr": "karşılaştırma"
+    },
+    {
+      "word": "comparable",
+      "type": "Adj",
+      "tr": "karşılaştırılabilir"
+    }
+  ],
+  [
+    {
+      "word": "compensate",
+      "type": "V",
+      "tr": "telafi etmek"
+    },
+    {
+      "word": "compensation",
+      "type": "N",
+      "tr": "telafi, tazminat"
+    }
+  ],
+  [
+    {
+      "word": "comply",
+      "type": "V",
+      "tr": "uymak"
+    },
+    {
+      "word": "compliance",
+      "type": "N",
+      "tr": "uyum"
+    },
+    {
+      "word": "compliant",
+      "type": "Adj",
+      "tr": "kurallara uyan"
+    }
+  ],
+  [
+    {
+      "word": "conclude",
+      "type": "V",
+      "tr": "sonuçlandırmak"
+    },
+    {
+      "word": "conclusion",
+      "type": "N",
+      "tr": "sonuç"
+    },
+    {
+      "word": "conclusive",
+      "type": "Adj",
+      "tr": "kesin, sonuç verici"
+    }
+  ],
+  [
+    {
+      "word": "conduct",
+      "type": "V",
+      "tr": "yürütmek"
+    },
+    {
+      "word": "conductor",
+      "type": "N",
+      "tr": "iletken, orkestra şefi"
+    }
+  ],
+  [
+    {
+      "word": "confine",
+      "type": "V",
+      "tr": "sınırlamak"
+    },
+    {
+      "word": "confinement",
+      "type": "N",
+      "tr": "kapatılma, sınırlandırma"
+    }
+  ],
+  [
+    {
+      "word": "confront",
+      "type": "V",
+      "tr": "yüzleşmek"
+    },
+    {
+      "word": "confrontation",
+      "type": "N",
+      "tr": "yüzleşme, karşı karşıya gelme"
+    }
+  ],
+  [
+    {
+      "word": "conserve",
+      "type": "V",
+      "tr": "korumak"
+    },
+    {
+      "word": "conservation",
+      "type": "N",
+      "tr": "koruma"
+    }
+  ],
+  [
+    {
+      "word": "constitute",
+      "type": "V",
+      "tr": "oluşturmak"
+    },
+    {
+      "word": "constitution",
+      "type": "N",
+      "tr": "anayasa, yapı"
+    },
+    {
+      "word": "constitutional",
+      "type": "Adj",
+      "tr": "anayasal"
+    }
+  ],
+  [
+    {
+      "word": "construct",
+      "type": "V",
+      "tr": "inşa etmek"
+    },
+    {
+      "word": "construction",
+      "type": "N",
+      "tr": "inşaat"
+    },
+    {
+      "word": "constructive",
+      "type": "Adj",
+      "tr": "yapıcı"
+    }
+  ],
+  [
+    {
+      "word": "contribute",
+      "type": "V",
+      "tr": "katkıda bulunmak"
+    },
+    {
+      "word": "contribution",
+      "type": "N",
+      "tr": "katkı"
+    },
+    {
+      "word": "contributor",
+      "type": "N",
+      "tr": "katkıda bulunan"
+    }
+  ],
+  [
+    {
+      "word": "convert",
+      "type": "V",
+      "tr": "dönüştürmek"
+    },
+    {
+      "word": "conversion",
+      "type": "N",
+      "tr": "dönüşüm"
+    },
+    {
+      "word": "convertible",
+      "type": "Adj",
+      "tr": "dönüştürülebilir"
+    }
+  ],
+  [
+    {
+      "word": "correlate",
+      "type": "V",
+      "tr": "ilişkilendirmek"
+    },
+    {
+      "word": "correlation",
+      "type": "N",
+      "tr": "ilişki, korelasyon"
+    }
+  ],
+  [
+    {
+      "word": "define",
+      "type": "V",
+      "tr": "tanımlamak"
+    },
+    {
+      "word": "definition",
+      "type": "N",
+      "tr": "tanım"
+    },
+    {
+      "word": "definable",
+      "type": "Adj",
+      "tr": "tanımlanabilir"
+    }
+  ],
+  [
+    {
+      "word": "demonstrate",
+      "type": "V",
+      "tr": "göstermek"
+    },
+    {
+      "word": "demonstration",
+      "type": "N",
+      "tr": "gösterim"
+    },
+    {
+      "word": "demonstrable",
+      "type": "Adj",
+      "tr": "kanıtlanabilir"
+    }
+  ],
+  [
+    {
+      "word": "derive",
+      "type": "V",
+      "tr": "türetmek"
+    },
+    {
+      "word": "derivation",
+      "type": "N",
+      "tr": "türetme"
+    },
+    {
+      "word": "derivative",
+      "type": "N",
+      "tr": "türev"
+    }
+  ],
+  [
+    {
+      "word": "detect",
+      "type": "V",
+      "tr": "tespit etmek"
+    },
+    {
+      "word": "detection",
+      "type": "N",
+      "tr": "tespit"
+    },
+    {
+      "word": "detectable",
+      "type": "Adj",
+      "tr": "tespit edilebilir"
+    }
+  ],
+  [
+    {
+      "word": "determine",
+      "type": "V",
+      "tr": "belirlemek"
+    },
+    {
+      "word": "determination",
+      "type": "N",
+      "tr": "belirleme, kararlılık"
+    },
+    {
+      "word": "determined",
+      "type": "Adj",
+      "tr": "kararlı"
+    }
+  ],
+  [
+    {
+      "word": "devote",
+      "type": "V",
+      "tr": "adamak"
+    },
+    {
+      "word": "devotion",
+      "type": "N",
+      "tr": "bağlılık"
+    },
+    {
+      "word": "devoted",
+      "type": "Adj",
+      "tr": "kendini adamış"
+    }
+  ],
+  [
+    {
+      "word": "differ",
+      "type": "V",
+      "tr": "farklı olmak"
+    },
+    {
+      "word": "difference",
+      "type": "N",
+      "tr": "fark"
+    },
+    {
+      "word": "different",
+      "type": "Adj",
+      "tr": "farklı"
+    },
+    {
+      "word": "differently",
+      "type": "Adv",
+      "tr": "farklı biçimde"
+    }
+  ],
+  [
+    {
+      "word": "disclose",
+      "type": "V",
+      "tr": "açıklamak"
+    },
+    {
+      "word": "disclosure",
+      "type": "N",
+      "tr": "açıklama, ifşa"
+    }
+  ],
+  [
+    {
+      "word": "disrupt",
+      "type": "V",
+      "tr": "aksatmak"
+    },
+    {
+      "word": "disruption",
+      "type": "N",
+      "tr": "aksama"
+    },
+    {
+      "word": "disruptive",
+      "type": "Adj",
+      "tr": "aksatıcı"
+    }
+  ],
+  [
+    {
+      "word": "distinguish",
+      "type": "V",
+      "tr": "ayırt etmek"
+    },
+    {
+      "word": "distinguishable",
+      "type": "Adj",
+      "tr": "ayırt edilebilir"
+    },
+    {
+      "word": "distinguished",
+      "type": "Adj",
+      "tr": "seçkin"
+    }
+  ],
+  [
+    {
+      "word": "emphasize",
+      "type": "V",
+      "tr": "vurgulamak"
+    },
+    {
+      "word": "emphasis",
+      "type": "N",
+      "tr": "vurgu"
+    },
+    {
+      "word": "emphatic",
+      "type": "Adj",
+      "tr": "vurgulu, kesin"
+    }
+  ],
+  [
+    {
+      "word": "able",
+      "type": "Adj",
+      "tr": "yapabilen"
+    },
+    {
+      "word": "enable",
+      "type": "V",
+      "tr": "olanak sağlamak"
+    },
+    {
+      "word": "ability",
+      "type": "N",
+      "tr": "yetenek"
+    },
+    {
+      "word": "unable",
+      "type": "Adj",
+      "tr": "yapamayan"
+    }
+  ],
+  [
+    {
+      "word": "enforce",
+      "type": "V",
+      "tr": "uygulanmasını sağlamak"
+    },
+    {
+      "word": "enforcement",
+      "type": "N",
+      "tr": "uygulama, yaptırım"
+    }
+  ],
+  [
+    {
+      "word": "enhance",
+      "type": "V",
+      "tr": "geliştirmek"
+    },
+    {
+      "word": "enhancement",
+      "type": "N",
+      "tr": "geliştirme"
+    }
+  ],
+  [
+    {
+      "word": "establish",
+      "type": "V",
+      "tr": "kurmak"
+    },
+    {
+      "word": "establishment",
+      "type": "N",
+      "tr": "kuruluş"
+    }
+  ],
+  [
+    {
+      "word": "evaluate",
+      "type": "V",
+      "tr": "değerlendirmek"
+    },
+    {
+      "word": "evaluation",
+      "type": "N",
+      "tr": "değerlendirme"
+    }
+  ],
+  [
+    {
+      "word": "examine",
+      "type": "V",
+      "tr": "incelemek"
+    },
+    {
+      "word": "examination",
+      "type": "N",
+      "tr": "inceleme, sınav"
+    },
+    {
+      "word": "examiner",
+      "type": "N",
+      "tr": "inceleyen kişi"
+    }
+  ],
+  [
+    {
+      "word": "expand",
+      "type": "V",
+      "tr": "genişletmek"
+    },
+    {
+      "word": "expansion",
+      "type": "N",
+      "tr": "genişleme"
+    },
+    {
+      "word": "expandable",
+      "type": "Adj",
+      "tr": "genişletilebilir"
+    }
+  ],
+  [
+    {
+      "word": "facilitate",
+      "type": "V",
+      "tr": "kolaylaştırmak"
+    },
+    {
+      "word": "facilitation",
+      "type": "N",
+      "tr": "kolaylaştırma"
+    },
+    {
+      "word": "facilitator",
+      "type": "N",
+      "tr": "kolaylaştırıcı"
+    }
+  ],
+  [
+    {
+      "word": "forecast",
+      "type": "V",
+      "tr": "tahmin etmek"
+    },
+    {
+      "word": "forecaster",
+      "type": "N",
+      "tr": "tahmin yapan kişi"
+    }
+  ],
+  [
+    {
+      "word": "fulfill",
+      "type": "V",
+      "tr": "yerine getirmek"
+    },
+    {
+      "word": "fulfillment",
+      "type": "N",
+      "tr": "yerine getirme, tatmin"
+    }
+  ],
+  [
+    {
+      "word": "generate",
+      "type": "V",
+      "tr": "üretmek"
+    },
+    {
+      "word": "generation",
+      "type": "N",
+      "tr": "üretim, nesil"
+    },
+    {
+      "word": "generator",
+      "type": "N",
+      "tr": "üreteç, jeneratör"
+    }
+  ],
+  [
+    {
+      "word": "govern",
+      "type": "V",
+      "tr": "yönetmek"
+    },
+    {
+      "word": "government",
+      "type": "N",
+      "tr": "hükûmet"
+    },
+    {
+      "word": "governance",
+      "type": "N",
+      "tr": "yönetişim"
+    }
+  ],
+  [
+    {
+      "word": "implement",
+      "type": "V",
+      "tr": "uygulamak"
+    },
+    {
+      "word": "implementation",
+      "type": "N",
+      "tr": "uygulama"
+    }
+  ],
+  [
+    {
+      "word": "influence",
+      "type": "N",
+      "tr": "etki"
+    },
+    {
+      "word": "influential",
+      "type": "Adj",
+      "tr": "etkili, nüfuzlu"
+    }
+  ],
+  [
+    {
+      "word": "inhibit",
+      "type": "V",
+      "tr": "engellemek"
+    },
+    {
+      "word": "inhibition",
+      "type": "N",
+      "tr": "engelleme, çekingenlik"
+    },
+    {
+      "word": "inhibitory",
+      "type": "Adj",
+      "tr": "engelleyici"
+    }
+  ],
+  [
+    {
+      "word": "integrate",
+      "type": "V",
+      "tr": "bütünleştirmek"
+    },
+    {
+      "word": "integration",
+      "type": "N",
+      "tr": "bütünleştirme"
+    },
+    {
+      "word": "integrated",
+      "type": "Adj",
+      "tr": "bütünleşik"
+    }
+  ],
+  [
+    {
+      "word": "interpret",
+      "type": "V",
+      "tr": "yorumlamak"
+    },
+    {
+      "word": "interpretation",
+      "type": "N",
+      "tr": "yorum"
+    },
+    {
+      "word": "interpreter",
+      "type": "N",
+      "tr": "tercüman"
+    }
+  ],
+  [
+    {
+      "word": "justify",
+      "type": "V",
+      "tr": "haklı çıkarmak"
+    },
+    {
+      "word": "justification",
+      "type": "N",
+      "tr": "gerekçe"
+    },
+    {
+      "word": "justifiable",
+      "type": "Adj",
+      "tr": "haklı görülebilir"
+    }
+  ],
+  [
+    {
+      "word": "maintain",
+      "type": "V",
+      "tr": "sürdürmek"
+    },
+    {
+      "word": "maintenance",
+      "type": "N",
+      "tr": "bakım"
+    },
+    {
+      "word": "maintainable",
+      "type": "Adj",
+      "tr": "bakımı yapılabilir"
+    }
+  ],
+  [
+    {
+      "word": "minimum",
+      "type": "N",
+      "tr": "en düşük miktar"
+    },
+    {
+      "word": "minimize",
+      "type": "V",
+      "tr": "en aza indirmek"
+    },
+    {
+      "word": "minimal",
+      "type": "Adj",
+      "tr": "en az düzeyde"
+    }
+  ],
+  [
+    {
+      "word": "neglect",
+      "type": "V",
+      "tr": "ihmal etmek"
+    },
+    {
+      "word": "neglectful",
+      "type": "Adj",
+      "tr": "ihmalkâr"
+    },
+    {
+      "word": "neglected",
+      "type": "Adj",
+      "tr": "ihmal edilmiş"
+    }
+  ],
+  [
+    {
+      "word": "obtain",
+      "type": "V",
+      "tr": "elde etmek"
+    },
+    {
+      "word": "obtainable",
+      "type": "Adj",
+      "tr": "elde edilebilir"
+    }
+  ],
+  [
+    {
+      "word": "participate",
+      "type": "V",
+      "tr": "katılmak"
+    },
+    {
+      "word": "participation",
+      "type": "N",
+      "tr": "katılım"
+    },
+    {
+      "word": "participant",
+      "type": "N",
+      "tr": "katılımcı"
+    }
+  ],
+  [
+    {
+      "word": "persist",
+      "type": "V",
+      "tr": "ısrar etmek, sürmek"
+    },
+    {
+      "word": "persistence",
+      "type": "N",
+      "tr": "ısrar, sebat"
+    },
+    {
+      "word": "persistent",
+      "type": "Adj",
+      "tr": "ısrarcı, kalıcı"
+    }
+  ],
+  [
+    {
+      "word": "predict",
+      "type": "V",
+      "tr": "öngörmek"
+    },
+    {
+      "word": "prediction",
+      "type": "N",
+      "tr": "öngörü"
+    },
+    {
+      "word": "predictable",
+      "type": "Adj",
+      "tr": "öngörülebilir"
+    }
+  ],
+  [
+    {
+      "word": "prevent",
+      "type": "V",
+      "tr": "önlemek"
+    },
+    {
+      "word": "prevention",
+      "type": "N",
+      "tr": "önleme"
+    },
+    {
+      "word": "preventive",
+      "type": "Adj",
+      "tr": "önleyici"
+    }
+  ],
+  [
+    {
+      "word": "promote",
+      "type": "V",
+      "tr": "teşvik etmek, terfi ettirmek"
+    },
+    {
+      "word": "promotion",
+      "type": "N",
+      "tr": "tanıtım, terfi"
+    },
+    {
+      "word": "promotional",
+      "type": "Adj",
+      "tr": "tanıtım amaçlı"
+    }
+  ],
+  [
+    {
+      "word": "pursue",
+      "type": "V",
+      "tr": "peşinden gitmek"
+    },
+    {
+      "word": "pursuit",
+      "type": "N",
+      "tr": "takip, arayış"
+    }
+  ],
+  [
+    {
+      "word": "reduce",
+      "type": "V",
+      "tr": "azaltmak"
+    },
+    {
+      "word": "reduction",
+      "type": "N",
+      "tr": "azalma"
+    },
+    {
+      "word": "reducible",
+      "type": "Adj",
+      "tr": "azaltılabilir"
+    }
+  ],
+  [
+    {
+      "word": "reinforce",
+      "type": "V",
+      "tr": "güçlendirmek"
+    },
+    {
+      "word": "reinforcement",
+      "type": "N",
+      "tr": "güçlendirme"
+    }
+  ],
+  [
+    {
+      "word": "reject",
+      "type": "V",
+      "tr": "reddetmek"
+    },
+    {
+      "word": "rejection",
+      "type": "N",
+      "tr": "ret"
+    }
+  ],
+  [
+    {
+      "word": "retain",
+      "type": "V",
+      "tr": "muhafaza etmek"
+    },
+    {
+      "word": "retention",
+      "type": "N",
+      "tr": "elde tutma"
+    }
+  ],
+  [
+    {
+      "word": "reveal",
+      "type": "V",
+      "tr": "ortaya çıkarmak"
+    },
+    {
+      "word": "revelation",
+      "type": "N",
+      "tr": "ortaya çıkan bilgi, ifşa"
+    }
+  ],
+  [
+    {
+      "word": "access",
+      "type": "N",
+      "tr": "erişim"
+    },
+    {
+      "word": "accessible",
+      "type": "Adj",
+      "tr": "erişilebilir"
+    },
+    {
+      "word": "accessibility",
+      "type": "N",
+      "tr": "erişilebilirlik"
+    }
+  ],
+  [
+    {
+      "word": "accurate",
+      "type": "Adj",
+      "tr": "doğru"
+    },
+    {
+      "word": "accuracy",
+      "type": "N",
+      "tr": "doğruluk"
+    },
+    {
+      "word": "accurately",
+      "type": "Adv",
+      "tr": "doğru biçimde"
+    },
+    {
+      "word": "inaccurate",
+      "type": "Adj",
+      "tr": "hatalı"
+    }
+  ],
+  [
+    {
+      "word": "agree",
+      "type": "V",
+      "tr": "aynı fikirde olmak"
+    },
+    {
+      "word": "agreement",
+      "type": "N",
+      "tr": "anlaşma"
+    },
+    {
+      "word": "disagree",
+      "type": "V",
+      "tr": "aynı fikirde olmamak"
+    }
+  ],
+  [
+    {
+      "word": "allocate",
+      "type": "V",
+      "tr": "tahsis etmek"
+    },
+    {
+      "word": "allocation",
+      "type": "N",
+      "tr": "tahsis"
+    }
+  ],
+  [
+    {
+      "word": "ambiguous",
+      "type": "Adj",
+      "tr": "belirsiz"
+    },
+    {
+      "word": "ambiguity",
+      "type": "N",
+      "tr": "belirsizlik"
+    },
+    {
+      "word": "unambiguous",
+      "type": "Adj",
+      "tr": "açık, kesin"
+    }
+  ],
+  [
+    {
+      "word": "amend",
+      "type": "V",
+      "tr": "değiştirmek, düzeltmek"
+    },
+    {
+      "word": "amendment",
+      "type": "N",
+      "tr": "değişiklik"
+    }
+  ],
+  [
+    {
+      "word": "analyze",
+      "type": "V",
+      "tr": "analiz etmek"
+    },
+    {
+      "word": "analysis",
+      "type": "N",
+      "tr": "analiz"
+    },
+    {
+      "word": "analytical",
+      "type": "Adj",
+      "tr": "analitik"
+    }
+  ],
+  [
+    {
+      "word": "approach",
+      "type": "N",
+      "tr": "yaklaşım"
+    },
+    {
+      "word": "approachable",
+      "type": "Adj",
+      "tr": "kolay iletişim kurulabilen"
+    }
+  ],
+  [
+    {
+      "word": "authority",
+      "type": "N",
+      "tr": "yetki, otorite"
+    },
+    {
+      "word": "authorize",
+      "type": "V",
+      "tr": "yetkilendirmek"
+    },
+    {
+      "word": "authorization",
+      "type": "N",
+      "tr": "yetkilendirme"
+    }
+  ],
+  [
+    {
+      "word": "aware",
+      "type": "Adj",
+      "tr": "farkında"
+    },
+    {
+      "word": "awareness",
+      "type": "N",
+      "tr": "farkındalık"
+    },
+    {
+      "word": "unaware",
+      "type": "Adj",
+      "tr": "farkında olmayan"
+    }
+  ],
+  [
+    {
+      "word": "benefit",
+      "type": "N",
+      "tr": "yarar"
+    },
+    {
+      "word": "beneficial",
+      "type": "Adj",
+      "tr": "faydalı"
+    },
+    {
+      "word": "beneficiary",
+      "type": "N",
+      "tr": "yararlanan kişi"
+    }
+  ],
+  [
+    {
+      "word": "capable",
+      "type": "Adj",
+      "tr": "yetenekli"
+    },
+    {
+      "word": "capacity",
+      "type": "N",
+      "tr": "kapasite"
+    },
+    {
+      "word": "capability",
+      "type": "N",
+      "tr": "yeterlik"
+    },
+    {
+      "word": "incapable",
+      "type": "Adj",
+      "tr": "yapamayan"
+    }
+  ],
+  [
+    {
+      "word": "challenge",
+      "type": "N",
+      "tr": "zorluk"
+    },
+    {
+      "word": "challenging",
+      "type": "Adj",
+      "tr": "zorlayıcı"
+    }
+  ],
+  [
+    {
+      "word": "compete",
+      "type": "V",
+      "tr": "rekabet etmek"
+    },
+    {
+      "word": "competition",
+      "type": "N",
+      "tr": "rekabet"
+    },
+    {
+      "word": "competitive",
+      "type": "Adj",
+      "tr": "rekabetçi"
+    },
+    {
+      "word": "competitor",
+      "type": "N",
+      "tr": "rakip"
+    }
+  ],
+  [
+    {
+      "word": "confident",
+      "type": "Adj",
+      "tr": "kendine güvenen"
+    },
+    {
+      "word": "confidence",
+      "type": "N",
+      "tr": "güven"
+    },
+    {
+      "word": "confidently",
+      "type": "Adv",
+      "tr": "güvenle"
+    }
+  ],
+  [
+    {
+      "word": "constrain",
+      "type": "V",
+      "tr": "kısıtlamak"
+    },
+    {
+      "word": "constraint",
+      "type": "N",
+      "tr": "kısıtlama"
+    }
+  ],
+  [
+    {
+      "word": "credible",
+      "type": "Adj",
+      "tr": "inandırıcı, güvenilir"
+    },
+    {
+      "word": "credibility",
+      "type": "N",
+      "tr": "güvenilirlik"
+    },
+    {
+      "word": "incredible",
+      "type": "Adj",
+      "tr": "inanılmaz"
+    }
+  ],
+  [
+    {
+      "word": "demand",
+      "type": "N",
+      "tr": "talep"
+    },
+    {
+      "word": "demanding",
+      "type": "Adj",
+      "tr": "çok çaba isteyen"
+    }
+  ],
+  [
+    {
+      "word": "develop",
+      "type": "V",
+      "tr": "geliştirmek"
+    },
+    {
+      "word": "development",
+      "type": "N",
+      "tr": "gelişim"
+    },
+    {
+      "word": "developer",
+      "type": "N",
+      "tr": "geliştirici"
+    }
+  ],
+  [
+    {
+      "word": "diverse",
+      "type": "Adj",
+      "tr": "çeşitli"
+    },
+    {
+      "word": "diversity",
+      "type": "N",
+      "tr": "çeşitlilik"
+    },
+    {
+      "word": "diversify",
+      "type": "V",
+      "tr": "çeşitlendirmek"
+    }
+  ],
+  [
+    {
+      "word": "efficient",
+      "type": "Adj",
+      "tr": "verimli"
+    },
+    {
+      "word": "efficiency",
+      "type": "N",
+      "tr": "verimlilik"
+    },
+    {
+      "word": "efficiently",
+      "type": "Adv",
+      "tr": "verimli biçimde"
+    }
+  ],
+  [
+    {
+      "word": "evidence",
+      "type": "N",
+      "tr": "kanıt"
+    },
+    {
+      "word": "evident",
+      "type": "Adj",
+      "tr": "açık"
+    },
+    {
+      "word": "evidently",
+      "type": "Adv",
+      "tr": "görünüşe göre, açıkça"
+    }
+  ],
+  [
+    {
+      "word": "grow",
+      "type": "V",
+      "tr": "büyümek"
+    },
+    {
+      "word": "growth",
+      "type": "N",
+      "tr": "büyüme"
+    },
+    {
+      "word": "growing",
+      "type": "Adj",
+      "tr": "büyüyen"
+    }
+  ],
+  [
+    {
+      "word": "indicate",
+      "type": "V",
+      "tr": "göstermek"
+    },
+    {
+      "word": "indicator",
+      "type": "N",
+      "tr": "gösterge"
+    },
+    {
+      "word": "indication",
+      "type": "N",
+      "tr": "belirti"
+    }
+  ],
+  [
+    {
+      "word": "innovate",
+      "type": "V",
+      "tr": "yenilik yapmak"
+    },
+    {
+      "word": "innovation",
+      "type": "N",
+      "tr": "yenilik"
+    },
+    {
+      "word": "innovative",
+      "type": "Adj",
+      "tr": "yenilikçi"
+    }
+  ],
+  [
+    {
+      "word": "insight",
+      "type": "N",
+      "tr": "kavrayış"
+    },
+    {
+      "word": "insightful",
+      "type": "Adj",
+      "tr": "derin kavrayış içeren"
+    }
+  ],
+  [
+    {
+      "word": "institute",
+      "type": "V",
+      "tr": "başlatmak, kurmak"
+    },
+    {
+      "word": "institution",
+      "type": "N",
+      "tr": "kurum"
+    },
+    {
+      "word": "institutional",
+      "type": "Adj",
+      "tr": "kurumsal"
+    }
+  ],
+  [
+    {
+      "word": "intervene",
+      "type": "V",
+      "tr": "müdahale etmek"
+    },
+    {
+      "word": "intervention",
+      "type": "N",
+      "tr": "müdahale"
+    }
+  ],
+  [
+    {
+      "word": "account",
+      "type": "N",
+      "tr": "hesap"
+    },
+    {
+      "word": "accounting",
+      "type": "N",
+      "tr": "muhasebe"
+    },
+    {
+      "word": "accountant",
+      "type": "N",
+      "tr": "muhasebeci"
+    }
+  ],
+  [
+    {
+      "word": "budget",
+      "type": "N",
+      "tr": "bütçe"
+    },
+    {
+      "word": "budgetary",
+      "type": "Adj",
+      "tr": "bütçeye ilişkin"
+    }
+  ],
+  [
+    {
+      "word": "capital",
+      "type": "N",
+      "tr": "sermaye"
+    },
+    {
+      "word": "capitalize",
+      "type": "V",
+      "tr": "sermayelendirmek"
+    },
+    {
+      "word": "capitalization",
+      "type": "N",
+      "tr": "sermayelendirme"
+    }
+  ],
+  [
+    {
+      "word": "credit",
+      "type": "N",
+      "tr": "kredi"
+    },
+    {
+      "word": "creditor",
+      "type": "N",
+      "tr": "alacaklı"
+    },
+    {
+      "word": "creditworthy",
+      "type": "Adj",
+      "tr": "krediye layık"
+    }
+  ],
+  [
+    {
+      "word": "debt",
+      "type": "N",
+      "tr": "borç"
+    },
+    {
+      "word": "debtor",
+      "type": "N",
+      "tr": "borçlu"
+    },
+    {
+      "word": "indebted",
+      "type": "Adj",
+      "tr": "borçlu, minnettar"
+    }
+  ],
+  [
+    {
+      "word": "deposit",
+      "type": "N",
+      "tr": "mevduat, yatırılan para"
+    },
+    {
+      "word": "depositor",
+      "type": "N",
+      "tr": "para yatıran kişi"
+    }
+  ],
+  [
+    {
+      "word": "equity",
+      "type": "N",
+      "tr": "özsermaye, hakkaniyet"
+    },
+    {
+      "word": "equitable",
+      "type": "Adj",
+      "tr": "adil"
+    }
+  ],
+  [
+    {
+      "word": "expense",
+      "type": "N",
+      "tr": "masraf"
+    },
+    {
+      "word": "expensive",
+      "type": "Adj",
+      "tr": "pahalı"
+    },
+    {
+      "word": "inexpensive",
+      "type": "Adj",
+      "tr": "ucuz"
+    }
+  ],
+  [
+    {
+      "word": "fraud",
+      "type": "N",
+      "tr": "dolandırıcılık"
+    },
+    {
+      "word": "fraudulent",
+      "type": "Adj",
+      "tr": "hileli"
+    }
+  ],
+  [
+    {
+      "word": "inflate",
+      "type": "V",
+      "tr": "şişirmek"
+    },
+    {
+      "word": "inflation",
+      "type": "N",
+      "tr": "enflasyon, şişirme"
+    },
+    {
+      "word": "inflationary",
+      "type": "Adj",
+      "tr": "enflasyona yol açan"
+    }
+  ],
+  [
+    {
+      "word": "insure",
+      "type": "V",
+      "tr": "sigortalamak"
+    },
+    {
+      "word": "insurance",
+      "type": "N",
+      "tr": "sigorta"
+    },
+    {
+      "word": "insurer",
+      "type": "N",
+      "tr": "sigortacı"
+    }
+  ],
+  [
+    {
+      "word": "invest",
+      "type": "V",
+      "tr": "yatırım yapmak"
+    },
+    {
+      "word": "investment",
+      "type": "N",
+      "tr": "yatırım"
+    },
+    {
+      "word": "investor",
+      "type": "N",
+      "tr": "yatırımcı"
+    }
+  ],
+  [
+    {
+      "word": "liable",
+      "type": "Adj",
+      "tr": "yükümlü"
+    },
+    {
+      "word": "liability",
+      "type": "N",
+      "tr": "yükümlülük"
+    }
+  ],
+  [
+    {
+      "word": "liquid",
+      "type": "Adj",
+      "tr": "sıvı, likit"
+    },
+    {
+      "word": "liquidity",
+      "type": "N",
+      "tr": "likidite"
+    },
+    {
+      "word": "illiquid",
+      "type": "Adj",
+      "tr": "nakde çevrilmesi zor"
+    }
+  ],
+  [
+    {
+      "word": "margin",
+      "type": "N",
+      "tr": "marj, kenar"
+    },
+    {
+      "word": "marginal",
+      "type": "Adj",
+      "tr": "marjinal, sınırlı"
+    }
+  ],
+  [
+    {
+      "word": "market",
+      "type": "N",
+      "tr": "piyasa"
+    },
+    {
+      "word": "marketing",
+      "type": "N",
+      "tr": "pazarlama"
+    },
+    {
+      "word": "marketable",
+      "type": "Adj",
+      "tr": "pazarlanabilir"
+    }
+  ],
+  [
+    {
+      "word": "pay",
+      "type": "V",
+      "tr": "ödemek"
+    },
+    {
+      "word": "payment",
+      "type": "N",
+      "tr": "ödeme"
+    },
+    {
+      "word": "payable",
+      "type": "Adj",
+      "tr": "ödenecek"
+    },
+    {
+      "word": "payee",
+      "type": "N",
+      "tr": "ödeme alıcısı"
+    }
+  ],
+  [
+    {
+      "word": "profit",
+      "type": "N",
+      "tr": "kâr"
+    },
+    {
+      "word": "profitable",
+      "type": "Adj",
+      "tr": "kârlı"
+    },
+    {
+      "word": "profitability",
+      "type": "N",
+      "tr": "kârlılık"
+    }
+  ],
+  [
+    {
+      "word": "risk",
+      "type": "N",
+      "tr": "risk"
+    },
+    {
+      "word": "risky",
+      "type": "Adj",
+      "tr": "riskli"
+    }
+  ],
+  [
+    {
+      "word": "save",
+      "type": "V",
+      "tr": "tasarruf etmek, kurtarmak"
+    },
+    {
+      "word": "savings",
+      "type": "N",
+      "tr": "tasarruf"
+    },
+    {
+      "word": "saver",
+      "type": "N",
+      "tr": "tasarruf eden kişi"
+    }
+  ],
+  [
+    {
+      "word": "transact",
+      "type": "V",
+      "tr": "işlem yapmak"
+    },
+    {
+      "word": "transaction",
+      "type": "N",
+      "tr": "işlem"
+    },
+    {
+      "word": "transactional",
+      "type": "Adj",
+      "tr": "işleme ilişkin"
+    }
+  ],
+  [
+    {
+      "word": "abundant",
+      "type": "Adj",
+      "tr": "bol"
+    },
+    {
+      "word": "abundance",
+      "type": "N",
+      "tr": "bolluk"
+    },
+    {
+      "word": "abundantly",
+      "type": "Adv",
+      "tr": "bol miktarda"
+    }
+  ],
+  [
+    {
+      "word": "adequate",
+      "type": "Adj",
+      "tr": "yeterli"
+    },
+    {
+      "word": "adequacy",
+      "type": "N",
+      "tr": "yeterlilik"
+    },
+    {
+      "word": "inadequate",
+      "type": "Adj",
+      "tr": "yetersiz"
+    }
+  ],
+  [
+    {
+      "word": "adverse",
+      "type": "Adj",
+      "tr": "olumsuz"
+    },
+    {
+      "word": "adversely",
+      "type": "Adv",
+      "tr": "olumsuz biçimde"
+    },
+    {
+      "word": "adversity",
+      "type": "N",
+      "tr": "güçlük"
+    }
+  ],
+  [
+    {
+      "word": "appropriate",
+      "type": "Adj",
+      "tr": "uygun"
+    },
+    {
+      "word": "appropriately",
+      "type": "Adv",
+      "tr": "uygun biçimde"
+    },
+    {
+      "word": "inappropriate",
+      "type": "Adj",
+      "tr": "uygunsuz"
+    }
+  ],
+  [
+    {
+      "word": "authentic",
+      "type": "Adj",
+      "tr": "gerçek, özgün"
+    },
+    {
+      "word": "authenticity",
+      "type": "N",
+      "tr": "gerçeklik, özgünlük"
+    },
+    {
+      "word": "authenticate",
+      "type": "V",
+      "tr": "doğrulamak"
+    }
+  ],
+  [
+    {
+      "word": "cohere",
+      "type": "V",
+      "tr": "bir bütün oluşturmak"
+    },
+    {
+      "word": "coherent",
+      "type": "Adj",
+      "tr": "tutarlı"
+    },
+    {
+      "word": "coherence",
+      "type": "N",
+      "tr": "tutarlılık"
+    }
+  ],
+  [
+    {
+      "word": "comprehend",
+      "type": "V",
+      "tr": "kavramak"
+    },
+    {
+      "word": "comprehension",
+      "type": "N",
+      "tr": "kavrama"
+    },
+    {
+      "word": "comprehensive",
+      "type": "Adj",
+      "tr": "kapsamlı"
+    }
+  ],
+  [
+    {
+      "word": "crucial",
+      "type": "Adj",
+      "tr": "hayati"
+    },
+    {
+      "word": "crucially",
+      "type": "Adv",
+      "tr": "hayati önem taşıyacak biçimde"
+    }
+  ],
+  [
+    {
+      "word": "durable",
+      "type": "Adj",
+      "tr": "dayanıklı"
+    },
+    {
+      "word": "durability",
+      "type": "N",
+      "tr": "dayanıklılık"
+    }
+  ],
+  [
+    {
+      "word": "ethics",
+      "type": "N",
+      "tr": "etik"
+    },
+    {
+      "word": "ethical",
+      "type": "Adj",
+      "tr": "etik"
+    },
+    {
+      "word": "ethically",
+      "type": "Adv",
+      "tr": "etik biçimde"
+    }
+  ],
+  [
+    {
+      "word": "exceed",
+      "type": "V",
+      "tr": "aşmak"
+    },
+    {
+      "word": "excess",
+      "type": "N",
+      "tr": "fazlalık"
+    },
+    {
+      "word": "excessive",
+      "type": "Adj",
+      "tr": "aşırı"
+    },
+    {
+      "word": "excessively",
+      "type": "Adv",
+      "tr": "aşırı biçimde"
+    }
+  ],
+  [
+    {
+      "word": "feasible",
+      "type": "Adj",
+      "tr": "uygulanabilir"
+    },
+    {
+      "word": "feasibility",
+      "type": "N",
+      "tr": "uygulanabilirlik"
+    }
+  ],
+  [
+    {
+      "word": "flexible",
+      "type": "Adj",
+      "tr": "esnek"
+    },
+    {
+      "word": "flexibility",
+      "type": "N",
+      "tr": "esneklik"
+    },
+    {
+      "word": "flexibly",
+      "type": "Adv",
+      "tr": "esnek biçimde"
+    }
+  ],
+  [
+    {
+      "word": "fundamental",
+      "type": "Adj",
+      "tr": "temel"
+    },
+    {
+      "word": "fundamentally",
+      "type": "Adv",
+      "tr": "temel olarak"
+    }
+  ],
+  [
+    {
+      "word": "inevitable",
+      "type": "Adj",
+      "tr": "kaçınılmaz"
+    },
+    {
+      "word": "inevitably",
+      "type": "Adv",
+      "tr": "kaçınılmaz biçimde"
+    }
+  ],
+  [
+    {
+      "word": "legitimate",
+      "type": "Adj",
+      "tr": "meşru"
+    },
+    {
+      "word": "legitimacy",
+      "type": "N",
+      "tr": "meşruiyet"
+    },
+    {
+      "word": "legitimately",
+      "type": "Adv",
+      "tr": "meşru biçimde"
+    }
+  ],
+  [
+    {
+      "word": "mandate",
+      "type": "N",
+      "tr": "yetki, talimat"
+    },
+    {
+      "word": "mandatory",
+      "type": "Adj",
+      "tr": "zorunlu"
+    }
+  ],
+  [
+    {
+      "word": "rely",
+      "type": "V",
+      "tr": "güvenmek"
+    },
+    {
+      "word": "reliable",
+      "type": "Adj",
+      "tr": "güvenilir"
+    },
+    {
+      "word": "reliability",
+      "type": "N",
+      "tr": "güvenilirlik"
+    },
+    {
+      "word": "reliably",
+      "type": "Adv",
+      "tr": "güvenilir biçimde"
+    }
+  ],
+  [
+    {
+      "word": "resilient",
+      "type": "Adj",
+      "tr": "dayanıklı"
+    },
+    {
+      "word": "resilience",
+      "type": "N",
+      "tr": "dayanıklılık"
+    }
+  ],
+  [
+    {
+      "word": "signify",
+      "type": "V",
+      "tr": "anlamına gelmek"
+    },
+    {
+      "word": "significant",
+      "type": "Adj",
+      "tr": "önemli"
+    },
+    {
+      "word": "significance",
+      "type": "N",
+      "tr": "önem"
+    },
+    {
+      "word": "significantly",
+      "type": "Adv",
+      "tr": "önemli ölçüde"
+    }
+  ],
+  [
+    {
+      "word": "sustain",
+      "type": "V",
+      "tr": "sürdürmek"
+    },
+    {
+      "word": "sustainable",
+      "type": "Adj",
+      "tr": "sürdürülebilir"
+    },
+    {
+      "word": "sustainability",
+      "type": "N",
+      "tr": "sürdürülebilirlik"
+    }
+  ],
+  [
+    {
+      "word": "valid",
+      "type": "Adj",
+      "tr": "geçerli"
+    },
+    {
+      "word": "validity",
+      "type": "N",
+      "tr": "geçerlilik"
+    },
+    {
+      "word": "validate",
+      "type": "V",
+      "tr": "doğrulamak"
+    }
+  ],
+  [
+    {
+      "word": "vulnerable",
+      "type": "Adj",
+      "tr": "savunmasız"
+    },
+    {
+      "word": "vulnerability",
+      "type": "N",
+      "tr": "savunmasızlık"
+    }
+  ],
+  [
+    {
+      "word": "approximate",
+      "type": "Adj",
+      "tr": "yaklaşık"
+    },
+    {
+      "word": "approximately",
+      "type": "Adv",
+      "tr": "yaklaşık olarak"
+    },
+    {
+      "word": "approximation",
+      "type": "N",
+      "tr": "yaklaşık değer"
+    }
+  ],
+  [
+    {
+      "word": "clear",
+      "type": "Adj",
+      "tr": "açık"
+    },
+    {
+      "word": "clearly",
+      "type": "Adv",
+      "tr": "açıkça"
+    },
+    {
+      "word": "clarity",
+      "type": "N",
+      "tr": "açıklık"
+    }
+  ],
+  [
+    {
+      "word": "consistent",
+      "type": "Adj",
+      "tr": "tutarlı"
+    },
+    {
+      "word": "consistently",
+      "type": "Adv",
+      "tr": "tutarlı biçimde"
+    },
+    {
+      "word": "consistency",
+      "type": "N",
+      "tr": "tutarlılık"
+    }
+  ],
+  [
+    {
+      "word": "continue",
+      "type": "V",
+      "tr": "devam etmek"
+    },
+    {
+      "word": "continuous",
+      "type": "Adj",
+      "tr": "sürekli"
+    },
+    {
+      "word": "continuously",
+      "type": "Adv",
+      "tr": "sürekli olarak"
+    }
+  ],
+  [
+    {
+      "word": "current",
+      "type": "Adj",
+      "tr": "mevcut"
+    },
+    {
+      "word": "currently",
+      "type": "Adv",
+      "tr": "şu anda"
+    }
+  ],
+  [
+    {
+      "word": "effect",
+      "type": "N",
+      "tr": "etki"
+    },
+    {
+      "word": "effective",
+      "type": "Adj",
+      "tr": "etkili"
+    },
+    {
+      "word": "effectively",
+      "type": "Adv",
+      "tr": "etkili biçimde"
+    },
+    {
+      "word": "effectiveness",
+      "type": "N",
+      "tr": "etkililik"
+    }
+  ],
+  [
+    {
+      "word": "eventual",
+      "type": "Adj",
+      "tr": "sonunda gerçekleşen"
+    },
+    {
+      "word": "eventually",
+      "type": "Adv",
+      "tr": "eninde sonunda"
+    }
+  ],
+  [
+    {
+      "word": "frequent",
+      "type": "Adj",
+      "tr": "sık"
+    },
+    {
+      "word": "frequently",
+      "type": "Adv",
+      "tr": "sık sık"
+    },
+    {
+      "word": "frequency",
+      "type": "N",
+      "tr": "sıklık"
+    }
+  ],
+  [
+    {
+      "word": "gradual",
+      "type": "Adj",
+      "tr": "aşamalı"
+    },
+    {
+      "word": "gradually",
+      "type": "Adv",
+      "tr": "aşamalı olarak"
+    }
+  ],
+  [
+    {
+      "word": "immediate",
+      "type": "Adj",
+      "tr": "anında olan"
+    },
+    {
+      "word": "immediately",
+      "type": "Adv",
+      "tr": "hemen"
+    }
+  ],
+  [
+    {
+      "word": "increase",
+      "type": "V",
+      "tr": "artmak, artırmak"
+    },
+    {
+      "word": "increasing",
+      "type": "Adj",
+      "tr": "artan"
+    },
+    {
+      "word": "increasingly",
+      "type": "Adv",
+      "tr": "giderek daha fazla"
+    }
+  ],
+  [
+    {
+      "word": "initial",
+      "type": "Adj",
+      "tr": "ilk, başlangıçtaki"
+    },
+    {
+      "word": "initially",
+      "type": "Adv",
+      "tr": "başlangıçta"
+    },
+    {
+      "word": "initiate",
+      "type": "V",
+      "tr": "başlatmak"
+    }
+  ],
+  [
+    {
+      "word": "large",
+      "type": "Adj",
+      "tr": "büyük"
+    },
+    {
+      "word": "largely",
+      "type": "Adv",
+      "tr": "büyük ölçüde"
+    }
+  ],
+  [
+    {
+      "word": "main",
+      "type": "Adj",
+      "tr": "ana, başlıca"
+    },
+    {
+      "word": "mainly",
+      "type": "Adv",
+      "tr": "başlıca"
+    }
+  ],
+  [
+    {
+      "word": "particular",
+      "type": "Adj",
+      "tr": "belirli, özel"
+    },
+    {
+      "word": "particularly",
+      "type": "Adv",
+      "tr": "özellikle"
+    }
+  ],
+  [
+    {
+      "word": "precise",
+      "type": "Adj",
+      "tr": "kesin"
+    },
+    {
+      "word": "precisely",
+      "type": "Adv",
+      "tr": "tam olarak"
+    },
+    {
+      "word": "precision",
+      "type": "N",
+      "tr": "kesinlik"
+    }
+  ],
+  [
+    {
+      "word": "primary",
+      "type": "Adj",
+      "tr": "birincil, temel"
+    },
+    {
+      "word": "primarily",
+      "type": "Adv",
+      "tr": "öncelikle"
+    }
+  ],
+  [
+    {
+      "word": "subsequent",
+      "type": "Adj",
+      "tr": "sonraki"
+    },
+    {
+      "word": "subsequently",
+      "type": "Adv",
+      "tr": "sonradan"
+    }
+  ],
+  [
+    {
+      "word": "ultimate",
+      "type": "Adj",
+      "tr": "nihai"
+    },
+    {
+      "word": "ultimately",
+      "type": "Adv",
+      "tr": "nihayetinde"
+    }
+  ],
+  [
+    {
+      "word": "act",
+      "type": "V",
+      "tr": "harekete geçmek"
+    },
+    {
+      "word": "action",
+      "type": "N",
+      "tr": "eylem"
+    },
+    {
+      "word": "active",
+      "type": "Adj",
+      "tr": "aktif"
+    },
+    {
+      "word": "actively",
+      "type": "Adv",
+      "tr": "aktif biçimde"
+    },
+    {
+      "word": "activity",
+      "type": "N",
+      "tr": "faaliyet"
+    }
+  ],
+  [
+    {
+      "word": "cost",
+      "type": "N",
+      "tr": "maliyet"
+    },
+    {
+      "word": "costly",
+      "type": "Adj",
+      "tr": "pahalı, maliyetli"
+    }
+  ],
+  [
+    {
+      "word": "responsible",
+      "type": "Adj",
+      "tr": "sorumlu"
+    },
+    {
+      "word": "responsibility",
+      "type": "N",
+      "tr": "sorumluluk"
+    },
+    {
+      "word": "responsibly",
+      "type": "Adv",
+      "tr": "sorumlu biçimde"
+    }
+  ],
+  [
+    {
+      "word": "attend",
+      "type": "V",
+      "tr": "katılmak, ilgilenmek"
+    },
+    {
+      "word": "attention",
+      "type": "N",
+      "tr": "dikkat"
+    },
+    {
+      "word": "attentive",
+      "type": "Adj",
+      "tr": "dikkatli"
+    }
+  ],
+  [
+    {
+      "word": "stable",
+      "type": "Adj",
+      "tr": "istikrarlı"
+    },
+    {
+      "word": "stability",
+      "type": "N",
+      "tr": "istikrar"
+    },
+    {
+      "word": "stabilize",
+      "type": "V",
+      "tr": "istikrara kavuşturmak"
+    }
+  ],
+  [
+    {
+      "word": "trust",
+      "type": "N",
+      "tr": "güven"
+    },
+    {
+      "word": "trustworthy",
+      "type": "Adj",
+      "tr": "güvenilir"
+    },
+    {
+      "word": "distrust",
+      "type": "N",
+      "tr": "güvensizlik"
+    }
+  ],
+  [
+    {
+      "word": "decide",
+      "type": "V",
+      "tr": "karar vermek"
+    },
+    {
+      "word": "decision",
+      "type": "N",
+      "tr": "karar"
+    },
+    {
+      "word": "decisive",
+      "type": "Adj",
+      "tr": "belirleyici, kararlı"
+    }
+  ]
+];
+const FAMILY_BY_WORD = new Map();
+for(const family of WORD_FAMILIES) {
+  for(const form of family) FAMILY_BY_WORD.set(form.word.toLowerCase(),family);
+}
+const PHRASE_FAMILIES = {
+  'take action':'act', 'reduce costs':'cost', 'raise awareness':'aware',
+  'take responsibility':'responsible', 'make a decision':'decide',
+  'reach an agreement':'agree', 'gain access':'access', 'pay attention':'attend',
+  'maintain stability':'stable', 'build trust':'trust', 'face a challenge':'challenge',
+  'have an impact':null
+};
+function renderWordFamily(word) {
+  const key=word.word.toLowerCase();
+  const family=FAMILY_BY_WORD.get(PHRASE_FAMILIES[key] || key);
+  if(!family) return '';
+  const typeNames={V:'Fiil',N:'İsim',Adj:'Sıfat',Adv:'Zarf'};
+  const isPhrase=Object.hasOwn(PHRASE_FAMILIES,key);
+  return `<section class="word-family" aria-label="Kelime ailesi">
+    <h3>Kelime ailesi</h3>
+    <p class="family-base">${isPhrase?'İfadedeki kelimenin ailesi':'Temel kelime'}: <strong lang="en">${escapeHTML(family[0].word)}</strong> — ${escapeHTML(family[0].tr)}</p>
+    <ul class="family-list">${family.map(form=>`<li${form.word.toLowerCase()===key?' class="family-current"':''}><span><strong lang="en">${escapeHTML(form.word)}</strong><span class="family-type">${typeNames[form.type]}</span></span><span class="family-meaning">${escapeHTML(form.tr)}</span></li>`).join('')}</ul>
+    <p class="family-note">Aynı ailedeki kelimelerin anlamı kullanıma göre değişebilir.</p>
+  </section>`;
 }
 
 // Persistent practice history and calendar-day spaced repetition.
@@ -1756,7 +4546,7 @@ function renderMistakes(app) {
   app.innerHTML=`<div class="list-header"><h2>Yanlışlarım</h2><span class="list-count">${words.length} kelime</span></div>
     <p class="screen-note">Yanlış yaptığın kelimeler burada kalır. Doğru cevaplasan da tekrar inceleyebilirsin.</p>
     ${words.length?'<button class="btn-full" onclick="practiceMistakes()">Yanlışları Test Et</button>':'<div class="empty-state">Henüz kaydedilmiş yanlış cevap yok. Yeni yanlışların burada görünecek.</div>'}
-    ${words.map(w=>{const r=practice.words[w.id]; return `<details class="mistake-card"><summary><strong>${escapeHTML(w.word)}</strong><span>${r.wrong} yanlış · ${escapeHTML(trOf(w))}</span></summary><div class="mistake-body"><div class="teach-syn">Eş anlamlı: ${escapeHTML(w.synonym)}</div>${renderExample(w)}<p class="screen-note">Sonraki tekrar: ${dueLabel(r.due)}${r.due<=dayKey()?' · Zamanı geldi':''}</p></div></details>`;}).join('')}`;
+    ${words.map(w=>{const r=practice.words[w.id]; return `<details class="mistake-card"><summary><strong>${escapeHTML(w.word)}</strong><span>${r.wrong} yanlış · ${escapeHTML(trOf(w))}</span></summary><div class="mistake-body"><div class="teach-syn">Eş anlamlı: ${escapeHTML(w.synonym)}</div>${renderExample(w)}${renderWordFamily(w)}<p class="screen-note">Sonraki tekrar: ${dueLabel(r.due)}${r.due<=dayKey()?' · Zamanı geldi':''}</p></div></details>`;}).join('')}`;
 }
 function streakCount() {
   let key=dayKey(), count=0;
@@ -1791,5 +4581,6 @@ if ('serviceWorker' in navigator) {
 </script>
 </body>
 </html>
+
 
 
