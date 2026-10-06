@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kelime-quiz-v5';
+const CACHE_NAME = 'kelime-quiz-v6';
 const ASSETS = [
   './',
   './index.html',
