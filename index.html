@@ -4358,7 +4358,11 @@ const WORD_FAMILIES = [
 ];
 const FAMILY_BY_WORD = new Map();
 for(const family of WORD_FAMILIES) {
-  for(const form of family) FAMILY_BY_WORD.set(form.word.toLowerCase(),family);
+  for(const form of family) {
+    const key=form.word.trim().toLowerCase();
+    if(FAMILY_BY_WORD.has(key)) throw new Error('Yinelenen aile kelimesi: '+key);
+    FAMILY_BY_WORD.set(key,family);
+  }
 }
 const PHRASE_FAMILIES = {
   'take action':'act', 'reduce costs':'cost', 'raise awareness':'aware',
@@ -4367,16 +4371,33 @@ const PHRASE_FAMILIES = {
   'maintain stability':'stable', 'build trust':'trust', 'face a challenge':'challenge',
   'have an impact':null
 };
+const PHRASE_FOCUS = {
+  'take action':'action', 'reduce costs':'cost', 'raise awareness':'awareness',
+  'take responsibility':'responsibility', 'make a decision':'decision',
+  'reach an agreement':'agreement', 'gain access':'access', 'pay attention':'attention',
+  'maintain stability':'stability', 'build trust':'trust', 'face a challenge':'challenge'
+};
+for(const [phrase,target] of Object.entries(PHRASE_FAMILIES)) {
+  if(target===null) continue;
+  const family=FAMILY_BY_WORD.get(target);
+  if(!family) throw new Error('Eksik kelime ailesi: '+phrase+' → '+target);
+  if(!family.some(form=>form.word.toLowerCase()===PHRASE_FOCUS[phrase])) {
+    throw new Error('Geçersiz ifade vurgusu: '+phrase);
+  }
+}
 function renderWordFamily(word) {
-  const key=word.word.toLowerCase();
-  const family=FAMILY_BY_WORD.get(PHRASE_FAMILIES[key] || key);
-  if(!family) return '';
-  const typeNames={V:'Fiil',N:'İsim',Adj:'Sıfat',Adv:'Zarf'};
+  const key=word.word.trim().toLowerCase();
   const isPhrase=Object.hasOwn(PHRASE_FAMILIES,key);
+  const target=isPhrase?PHRASE_FAMILIES[key]:key;
+  if(target===null) return '';
+  const family=FAMILY_BY_WORD.get(target);
+  if(!family) return '';
+  const focus=isPhrase?PHRASE_FOCUS[key]:key;
+  const typeNames={V:'Fiil',N:'İsim',Adj:'Sıfat',Adv:'Zarf'};
   return `<section class="word-family" aria-label="Kelime ailesi">
     <h3>Kelime ailesi</h3>
     <p class="family-base">${isPhrase?'İfadedeki kelimenin ailesi':'Temel kelime'}: <strong lang="en">${escapeHTML(family[0].word)}</strong> — ${escapeHTML(family[0].tr)}</p>
-    <ul class="family-list">${family.map(form=>`<li${form.word.toLowerCase()===key?' class="family-current"':''}><span><strong lang="en">${escapeHTML(form.word)}</strong><span class="family-type">${typeNames[form.type]}</span></span><span class="family-meaning">${escapeHTML(form.tr)}</span></li>`).join('')}</ul>
+    <ul class="family-list">${family.map(form=>`<li${form.word.toLowerCase()===focus?' class="family-current"':''}><span><strong lang="en">${escapeHTML(form.word)}</strong><span class="family-type">${typeNames[form.type]}</span></span><span class="family-meaning">${escapeHTML(form.tr)}</span></li>`).join('')}</ul>
     <p class="family-note">Aynı ailedeki kelimelerin anlamı kullanıma göre değişebilir.</p>
   </section>`;
 }
