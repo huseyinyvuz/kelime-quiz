@@ -4628,12 +4628,154 @@ function connectorMeaningOptions(connector) {
   }
   return shuffle([connector.meaning, ...shuffle([...byCategory.values()]).slice(0, 3)]);
 }
+const CONNECTOR_TRANSLATIONS = {
+  "because": [
+    "Şirket, geliri azalmış olduğu için maliyetleri düşürdü.",
+    "Müdür hasta olduğu için toplantıyı iptal ettik.",
+    "Belgeler eksik olduğu için banka başvuruyu reddetti.",
+    "Şifresini unuttuğu için hesaba erişemedi.",
+    "Talep beklenmedik şekilde arttığı için tahmin değişti."
+  ],
+  "because of": [
+    "Proje, teknik bir sorun nedeniyle gecikti.",
+    "Azalan talep nedeniyle gelir düştü.",
+    "Güvenlik kısıtlamaları nedeniyle binaya giremedik.",
+    "Yoğun trafik nedeniyle sevkiyat geç ulaştı.",
+    "Fabrika, altyapısındaki hasar nedeniyle geçici olarak kapandı."
+  ],
+  "although": [
+    "Görev zor olmasına rağmen onu başarıyla tamamladı.",
+    "Maliyetler artmasına rağmen şirket fiyatlarını değiştirmedi.",
+    "Deneyimi olmamasına rağmen işe alındı.",
+    "Tahmin doğru olmasına rağmen ekip onu dikkate almadı.",
+    "Kredi pahalı olmasına rağmen teklifi kabul ettiler."
+  ],
+  "despite": [
+    "Şiddetli yağmura rağmen maç devam etti.",
+    "Şirket, sınırlı kaynaklarına rağmen büyüdü.",
+    "Birçok engelle karşılaşmasına rağmen kendine güvenini korudu.",
+    "Farklılıklarına rağmen anlaşmaya vardılar.",
+    "Artan maliyetlere rağmen yatırım kârlı olmaya devam etti."
+  ],
+  "however": [
+    "Yatırım riskliydi. Ancak kâr sağladı.",
+    "Plan uygulanabilir görünüyordu. Ancak onu uygulamak için gerekli kaynaklarımız yoktu.",
+    "Talep arttı. Ancak gelir değişmedi.",
+    "Başvuru sahibi yetkindi. Ancak banka onun teklifini reddetti.",
+    "Tahmin büyüme öngörüyordu. Ancak piyasa geriledi."
+  ],
+  "therefore": [
+    "Belgeler eksikti. Bu nedenle başvuru reddedildi.",
+    "Şirket giderlerini azalttı. Bu nedenle kârı arttı.",
+    "Hesap kilitliydi. Bu nedenle hesaba erişemedi.",
+    "Yatırım fazla riskliydi. Bu nedenle devam etmemeye karar verdik.",
+    "Ekip tüm ölçütleri karşıladı. Bu nedenle teklifi onaylandı."
+  ],
+  "unless": [
+    "Doğru şifreyi girmedikçe hesaba erişemezsin.",
+    "Teminat sağlamadıkça banka krediyi onaylamayacak.",
+    "Ek finansman elde etmezsek proje başarısız olacak.",
+    "Herkes katkıda bulunmadıkça işi son teslim tarihine yetiştiremeyiz.",
+    "Makineyi açmadıkça çalışmayacak."
+  ],
+  "while": [
+    "Müdür genel çerçeveyi açıklarken not aldı.",
+    "Ben ödeme ayrıntılarını kontrol ederken o faturayı inceledi.",
+    "Biz tahmini hazırlarken onlar bütçeyi görüştüler.",
+    "Verileri analiz ederken bir hata fark ettim.",
+    "Personel denetim yaparken alarm çaldı."
+  ],
+  "during": [
+    "Toplantı sırasında bütçeyi görüştük.",
+    "Banka, tadilat sırasında açık kaldı.",
+    "Stajı sırasında değerli beceriler edindi.",
+    "Denetim sırasında birkaç sorun ortaya çıktı.",
+    "Ekip, geçiş sırasında istikrarı korudu."
+  ],
+  "before": [
+    "Ödemeyi yapmadan önce faturayı kontrol et.",
+    "Birikimlerini yatırmadan önce riski değerlendir.",
+    "Anlaşmayı imzalamadan önce tüm koşulları oku.",
+    "Sistemi değiştirmeden önce verileri yedekle.",
+    "Yeni politikayı uygulamadan önce onay al."
+  ],
+  "whereas": [
+    "İlk kredinin faiz oranı sabittir, oysa ikincinin faiz oranı değişkendir.",
+    "Yurt içi talep arttı, oysa ihracat talebi azaldı.",
+    "Anna bütçeyi yönetir, oysa Ali işe alımla ilgilenir.",
+    "Bu varlık kolayca nakde çevrilebilir, oysa o gayrimenkulü satmak zordur.",
+    "Eski sistem yavaştı, oysa yeni sistem verileri anında işliyor."
+  ],
+  "nevertheless": [
+    "Proje ciddi engellerle karşılaştı. Yine de ekip hedefine ulaştı.",
+    "Kanıtlar sınırlıydı. Yine de komite teklifi onayladı.",
+    "Maliyetler yüksekti. Yine de yatırıma devam ettiler.",
+    "Görev zorluydu. Yine de sorumluluk almayı kabul etti.",
+    "Piyasa istikrarsızdı. Yine de şirket büyüdü."
+  ],
+  "moreover": [
+    "Plan maliyetleri azaltıyor. Ayrıca verimliliği artırıyor.",
+    "Sistem doğru sonuçlar veriyor. Ayrıca bakımı kolay.",
+    "Başvuru sahibinin deneyimi var. Ayrıca ilgili bir yeterlilik belgesine sahip.",
+    "Yatırım gelir sağlıyor. Ayrıca portföyümüzü çeşitlendiriyor.",
+    "Politika müşterileri koruyor. Ayrıca güveni pekiştiriyor."
+  ],
+  "otherwise": [
+    "Faturayı bugün teslim et; aksi takdirde ödeme gecikecek.",
+    "Dosyalarını yedekle; aksi takdirde değerli verileri kaybedebilirsin.",
+    "Giderlerini azalt; aksi takdirde bütçeyi aşacaksın.",
+    "Talimatları dikkatle oku; aksi takdirde parçaya zarar verebilirsin.",
+    "Taksiti zamanında öde; aksi takdirde banka ücret talep edebilir."
+  ],
+  "provided that": [
+    "Tüm ölçütlerini karşılaman şartıyla banka krediyi onaylayacak.",
+    "Müdürünün izin vermesi şartıyla sisteme erişebilirsin.",
+    "Herkes görevlerini zamanında tamamladığı takdirde işi son teslim tarihine yetiştirebiliriz.",
+    "Her iki tarafın da kabul etmesi şartıyla sözleşme uzatılabilir.",
+    "Ek kaynakların mevcut olması şartıyla proje uygulanabilir."
+  ],
+  "owing to": [
+    "Uçuş, olumsuz hava koşulları nedeniyle iptal edildi.",
+    "Parça eksikliği nedeniyle üretim azaldı.",
+    "Kurum, mali zorluklar nedeniyle kapandı.",
+    "Malzeme maliyetlerindeki artış nedeniyle tahmini tutar değişti.",
+    "Faturadaki bir hata nedeniyle ödeme gecikti."
+  ],
+  "in spite of": [
+    "Beklenmedik birkaç engele rağmen projeyi tamamladılar.",
+    "Banka, ekonomik krize rağmen istikrarını korudu.",
+    "Hayal kırıklığı yaratan haberler almasına rağmen sakin kaldı.",
+    "Şirket, yoğun rekabete rağmen büyüdü.",
+    "Başlangıçtaki itirazlara rağmen onay aldı."
+  ],
+  "so that": [
+    "Yeni çalışanların anlayabilmesi için genel çerçeveyi basitleştirdik.",
+    "Daha fazla müşterinin hizmetlerinden yararlanabilmesi için banka ücretleri düşürdü.",
+    "Peşinatı karşılayabilmek için düzenli olarak birikim yaptı.",
+    "Herkesin uyabilmesi için talimatları netleştirdiler.",
+    "Tüm kullanıcıların platforma erişebilmesi için erişilebilirliği geliştirdik."
+  ],
+  "albeit": [
+    "Yatırım, beklediğimizden daha az olsa da kârlıydı.",
+    "Genel çerçeve, biraz karmaşık olsa da yararlıdır.",
+    "Geçici de olsa bir anlaşmaya vardılar.",
+    "Tahmin, eksik olsa da doğruydu.",
+    "Şirket, yüksek bir maliyetle de olsa büyüme sağladı."
+  ],
+  "notwithstanding": [
+    "Teklif, güçlü itirazlara rağmen onaylandı.",
+    "Kurum, iddialara rağmen güvenilirliğini korudu.",
+    "Proje, yüksek maliyetine rağmen devam etti.",
+    "Belirsiz tahmine rağmen güvenlerini korudular.",
+    "Şirket, ciddi mali kısıtlamalara rağmen yükümlülüklerini yerine getirdi."
+  ]
+};
 const CONNECTORS = [["because","Bağlaç","çünkü",1,"Ardından özne + fiil gelir; neden bildirir.",["The company reduced costs _____ its revenue had fallen.|because of,despite,therefore","We cancelled the meeting _____ the manager was ill.|despite,during,however","The bank rejected the application _____ the documents were incomplete.|because of,in spite of,moreover","She could not access the account _____ she had forgotten her password.|due to,although,therefore","The forecast changed _____ demand increased unexpectedly.|because of,despite,otherwise"]],["because of","Edat","-den dolayı",1,"Ardından isim veya V-ing gelir; neden bildirir.",["The project was delayed _____ a technical issue.|because,although,however","Revenue fell _____ declining demand.|because,despite,therefore","We could not enter the building _____ the security restrictions.|although,because,moreover","The shipment arrived late _____ heavy traffic.|because,however,despite","The factory closed temporarily _____ damage to its infrastructure.|because,although,therefore"]],["although","Bağlaç","-mesine rağmen",1,"Ardından özne + fiil gelir; beklentiye ters sonuç bildirir.",["_____ the task was challenging, she completed it successfully.|Despite,Because of,During","_____ costs increased, the company kept its prices unchanged.|Despite,Due to,Therefore","_____ he lacked experience, he obtained the position.|In spite of,Because of,Moreover","_____ the forecast was accurate, the team ignored it.|Despite,During,Therefore","_____ the loan was expensive, they accepted the offer.|Despite,Because of,However"]],["despite","Edat","-mesine rağmen",1,"Ardından isim veya V-ing gelir; doğrudan özne + fiil gelmez.",["The match continued _____ the heavy rain.|although,because,however","The company expanded _____ limited resources.|although,because,therefore","She remained confident _____ facing several barriers.|although,because,moreover","They reached an agreement _____ their differences.|although,because,therefore","The investment remained profitable _____ rising costs.|although,because,however"]],["however","Cümle zarfı","ancak / bununla birlikte",1,"İki cümle arasında zıtlık kurar; bu örneklerde ardından virgül gelir.",["The investment was risky. _____, it generated a profit.|Therefore,Moreover,For example","The plan seemed feasible. _____, we lacked the resources to implement it.|Therefore,Moreover,As a result","Demand increased. _____, revenue remained unchanged.|Therefore,Moreover,For example","The applicant was capable. _____, the bank rejected his proposal.|Therefore,Moreover,As a result","The forecast predicted growth. _____, the market declined.|Therefore,Moreover,For example"]],["therefore","Cümle zarfı","bu nedenle",1,"Önceki cümlenin sonucunu bildirir.",["The documents were incomplete. _____, the application was rejected.|However,Nevertheless,In contrast","The company reduced its expenses. _____, its profit increased.|However,Nevertheless,In contrast","The account was locked. _____, she could not gain access.|However,Nevertheless,In contrast","The investment was too risky. _____, we decided not to proceed.|However,Nevertheless,In contrast","The team met every criterion. _____, its proposal was approved.|However,Nevertheless,In contrast"]],["unless","Bağlaç","-medikçe / eğer ... değilse",1,"Olumsuz koşul bildirir: unless ≈ if ... not.",["You cannot access the account _____ you enter the correct password.|because,although,whereas","The bank will not approve the loan _____ you provide a guarantee.|because,although,whereas","The project will fail _____ we obtain additional funding.|although,because,whereas","We cannot meet the deadline _____ everyone contributes.|although,because,whereas","The machine will not operate _____ you switch on the power.|although,because,whereas"]],["while","Bağlaç","-iken",1,"Bu sorularda aynı anda gerçekleşen eylemleri bağlar.",["She took notes _____ the manager was explaining the framework.|despite,during,because of","He examined the invoice _____ I checked the payment details.|during,despite,because of","They discussed the budget _____ we were preparing the forecast.|during,despite,because of","I noticed an error _____ I was analysing the data.|during,despite,because of","The alarm rang _____ the staff were conducting an inspection.|during,despite,because of"]],["during","Edat","sırasında / boyunca",1,"Ardından bir olay veya zaman belirten isim gelir.",["We discussed the budget _____ the meeting.|while,although,because","The bank remained open _____ the renovation.|while,because,although","She acquired valuable skills _____ her internship.|while,although,because","Several issues arose _____ the inspection.|while,because,although","The team maintained stability _____ the transition.|while,because,although"]],["before","Bağlaç","-meden önce",1,"Bu sorularda ardından özne + fiil gelir; önce yapılması gereken işi belirtir.",["Check the invoice _____ you make the payment.|despite,during,because of","Assess the risk _____ you invest your savings.|despite,during,because of","Read every condition _____ you sign the agreement.|despite,during,because of","Back up the data _____ you alter the system.|despite,during,because of","Obtain approval _____ you implement the new policy.|despite,during,because of"]],["whereas","Bağlaç","oysa / buna karşılık",2,"İki durumu karşılaştırır; ardından özne + fiil gelir.",["The first loan has a fixed rate, _____ the second has a variable rate.|despite,during,moreover","Domestic demand grew, _____ export demand declined.|despite,because of,however","Anna manages the budget, _____ Ali handles recruitment.|despite,during,therefore","This asset is liquid, _____ that property is difficult to sell.|despite,because of,however","The old system was slow, _____ the new one processes data immediately.|despite,during,moreover"]],["nevertheless","Cümle zarfı","yine de / buna rağmen",2,"Önceki bilgiye rağmen gerçekleşen sonucu bildirir.",["The project faced serious barriers. _____, the team achieved its goal.|Therefore,Moreover,For example","The evidence was limited. _____, the committee approved the proposal.|Therefore,Moreover,For example","The costs were considerable. _____, they continued the investment.|Therefore,Moreover,For example","The task was demanding. _____, she agreed to take responsibility.|Therefore,Moreover,For example","The market was unstable. _____, the company expanded.|Therefore,Moreover,For example"]],["moreover","Cümle zarfı","üstelik / ayrıca",2,"Önceki bilgiyi destekleyen ek bilgi verir.",["The plan reduces costs. _____, it improves efficiency.|However,Nevertheless,In contrast","The system is accurate. _____, it is easy to maintain.|However,Nevertheless,In contrast","The applicant has experience. _____, she holds a relevant qualification.|However,Nevertheless,In contrast","The investment generates income. _____, it diversifies our portfolio.|However,Nevertheless,In contrast","The policy protects customers. _____, it reinforces trust.|However,Nevertheless,In contrast"]],["otherwise","Cümle zarfı","aksi takdirde",2,"Bir şart yerine gelmezse ortaya çıkacak sonucu bildirir.",["Submit the invoice today; _____, payment will be delayed.|moreover,for example,in addition","Back up your files; _____, you may lose valuable data.|moreover,for example,in addition","Reduce your expenses; _____, you will exceed the budget.|moreover,for example,in addition","Read the instructions carefully; _____, you may damage the component.|moreover,for example,in addition","Pay the instalment on time; _____, the bank may charge a fee.|moreover,for example,in addition"]],["provided that","Bağlaç","şartıyla",2,"Olumlu koşul bildirir; ardından özne + fiil gelir.",["The bank will approve the loan _____ you meet all its criteria.|despite,because of,during","You may access the system _____ your manager authorizes it.|despite,during,in spite of","We can meet the deadline _____ everyone completes their tasks on time.|despite,because of,during","The contract can be extended _____ both parties agree.|despite,during,in spite of","The project is feasible _____ additional resources are available.|despite,because of,during"]],["owing to","Edat","-den dolayı",2,"Neden bildirir; ardından isim veya V-ing gelir.",["The flight was cancelled _____ severe weather.|although,because,however","Production declined _____ a shortage of components.|although,because,therefore","The institution closed _____ financial difficulties.|although,because,moreover","The estimate changed _____ an increase in material costs.|although,because,however","The payment was delayed _____ an error in the invoice.|although,because,therefore"]],["in spite of","Edat","-mesine rağmen",2,"Despite ile benzer şekilde isim veya V-ing alır.",["They completed the project _____ several unexpected obstacles.|although,because,however","The bank remained stable _____ the economic crisis.|although,because,therefore","He stayed calm _____ receiving disappointing news.|although,because,moreover","The company grew _____ intense competition.|although,because,however","She obtained approval _____ initial opposition.|although,because,therefore"]],["so that","Bağlaç","-mesi için",2,"Amaç bildirir; ardından özne + fiil, sıklıkla can/could gelir.",["We simplified the framework _____ new employees could understand it.|despite,because of,during","The bank lowered fees _____ more customers could afford its services.|despite,during,in spite of","She saved regularly _____ she could afford a deposit.|despite,because of,during","They clarified the instructions _____ everyone could comply with them.|despite,during,in spite of","We improved accessibility _____ all users could access the platform.|despite,because of,during"]],["albeit","Bağlaç","gerçi / ... olsa da",3,"Burada sıfat öbekleriyle kısaltılmış bir karşıtlık kurar.",["The investment was profitable, _____ less so than we had anticipated.|therefore,moreover,otherwise","The framework is useful, _____ somewhat complex.|therefore,moreover,otherwise","They reached an agreement, _____ a temporary one.|therefore,moreover,otherwise","The forecast was accurate, _____ incomplete.|therefore,moreover,otherwise","The company achieved growth, _____ at considerable expense.|therefore,moreover,otherwise"]],["notwithstanding","Edat","-e rağmen",3,"Resmî kullanımda despite anlamındadır; burada isim öbeği alır.",["The proposal was approved _____ strong objections.|although,because,therefore","The institution remained credible _____ the allegations.|although,because,however","The project continued _____ its considerable cost.|although,because,moreover","They maintained confidence _____ the uncertain forecast.|although,because,therefore","The company met its obligations _____ severe financial constraints.|although,because,however"]]].map((r,i)=>({
   id:i,word:r[0],group:r[1],meaning:CONNECTOR_MEANINGS[r[0]][0],meaningCategory:CONNECTOR_MEANINGS[r[0]][1],tier:r[3],tip:r[4],
   questions:r[5].map((s,j)=>{
     const [sentence,others]=s.split('|');
     const answer=/^[A-Z]/.test(sentence)?r[0][0].toUpperCase()+r[0].slice(1):r[0];
-    return {sentence,answer,others:others.split(','),level:r[3]===3?'C1':i<5&&j===0?'A2':j%2?'B1':'B2'};
+    return {sentence,answer,translation:CONNECTOR_TRANSLATIONS[r[0]][j],others:others.split(','),level:r[3]===3?'C1':i<5&&j===0?'A2':j%2?'B1':'B2'};
   })
 }));
 let connectorHistory={};
@@ -4727,6 +4869,7 @@ function renderConnectors(app){
     }).join('')+'</div>'+
     (s.answered?'<div class="teach-card"><div class="teach-tr">'+escapeHTML(c.word)+' — '+escapeHTML(c.meaning)+'</div>'+
       '<p class="teach-tip">'+escapeHTML(c.tip)+'</p><p class="teach-example-en" lang="en">'+escapeHTML((q||c.questions[0]).sentence.replace('_____', (q||c.questions[0]).answer))+'</p>'+
+      (s.options[s.selected]!==s.answer?'<p class="teach-example-tr" lang="tr"><strong>Türkçe:</strong> '+escapeHTML((q||c.questions[0]).translation)+'</p>':'')+
       '<p class="screen-note">'+(s.options[s.selected]===s.answer?(mode==='meaning'?'Bu kelimenin boşluk soruları açıldı.':'Doğru kullanım!'):'Bu soru turun sonunda yeniden gelecek.')+'</p></div>'+
       '<button class="next-btn" onclick="nextConnector()">Devam Et →</button>':'');
 }
