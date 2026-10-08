@@ -4781,36 +4781,61 @@ const CONNECTORS = [["because","Bağlaç","çünkü",1,"Ardından özne + fiil g
 let connectorHistory={};
 try {
   const saved=JSON.parse(localStorage.getItem('kl_connectors_v1')||'{}');
-  if(saved && typeof saved==='object' && !Array.isArray(saved)) {
-    for(const c of CONNECTORS) {
-      const r=saved[c.id];
-      if(r && typeof r==='object') connectorHistory[c.id]={
-        unlocked:r.unlocked===true,wrong:Number.isInteger(r.wrong)&&r.wrong>=0?r.wrong:0,
-        correct:Number.isInteger(r.correct)&&r.correct>=0?r.correct:0
-      };
-    }
+  for(const c of CONNECTORS) {
+    const r=saved?.[c.id];
+    if(r && typeof r==='object') connectorHistory[c.id]={
+      unlocked:r.unlocked===true,
+      wrong:Number.isInteger(r.wrong)&&r.wrong>=0?r.wrong:0,
+      correct:Number.isInteger(r.correct)&&r.correct>=0?r.correct:0
+    };
   }
 } catch(e) {}
-let connectorSession=null;
-function saveConnectors(){
-  try {localStorage.setItem('kl_connectors_v1',JSON.stringify(connectorHistory));}catch(e){}
-}
-function connectorHome(){
-  connectorSession=null; S.tab='connectors';syncTabs();render();
-}
-function startConnectors(mode,tier){
-  const pool=CONNECTORS.filter(c=>c.tier===tier);
-  let questions;
-  if(mode==='meaning'){
-    questions=pool.filter(c=>!connectorHistory[c.id]?.unlocked);
-    if(!questions.length) questions=pool;
-    questions=questions.map(c=>({c,mode}));
-  }else{
-    questions=pool.filter(c=>connectorHistory[c.id]?.unlocked)
-      .flatMap(c=>c.questions.map(q=>({c,q,mode})));
+let connectorQuestions={};
+const connectorItems=CONNECTORS.flatMap(c=>[
+  {c,mode:'meaning',key:'meaning:'+c.word},
+  ...c.questions.map(q=>({c,q,mode:'cloze',key:'cloze:'+c.word+':'+q.sentence}))
+]);
+try {
+  const saved=JSON.parse(localStorage.getItem('kl_connector_questions_v1')||'{}');
+  for(const item of connectorItems){
+    const r=saved?.[item.key];
+    if(r && typeof r==='object') connectorQuestions[item.key]={
+      solved:r.solved===true,needsReview:r.needsReview===true,
+      wrong:Number.isInteger(r.wrong)&&r.wrong>=0?r.wrong:0,
+      correct:Number.isInteger(r.correct)&&r.correct>=0?r.correct:0
+    };
   }
+} catch(e) {}
+let connectorSession=null,connectorView='practice',connectorSaveFailed=false;
+function saveConnectors(){
+  try {
+    localStorage.setItem('kl_connectors_v1',JSON.stringify(connectorHistory));
+    localStorage.setItem('kl_connector_questions_v1',JSON.stringify(connectorQuestions));
+    connectorSaveFailed=false;
+  }catch(e){connectorSaveFailed=true;}
+}
+function allConnectorMeaningsLearned(){
+  return CONNECTORS.every(c=>connectorHistory[c.id]?.unlocked);
+}
+function connectorHome(view='practice'){
+  connectorSession=null;connectorView=view;S.tab='connectors';syncTabs();render();
+}
+function startConnectors(mode,tier=0,review=false){
+  if(mode==='cloze'&&!allConnectorMeaningsLearned())return;
+  const questions=connectorItems.filter(item=>{
+    if(item.mode!==mode || (tier && item.c.tier!==tier))return false;
+    if(review)return mode==='meaning'?connectorHistory[item.c.id]?.unlocked:connectorQuestions[item.key]?.solved;
+    return mode==='meaning'?!connectorHistory[item.c.id]?.unlocked:!connectorQuestions[item.key]?.solved;
+  });
+  beginConnectorSession(questions);
+}
+function startConnectorMistakes(){
+  beginConnectorSession(connectorItems.filter(item=>connectorQuestions[item.key]?.needsReview &&
+    (item.mode==='meaning'||allConnectorMeaningsLearned())));
+}
+function beginConnectorSession(questions){
   if(!questions.length)return;
-  connectorSession={items:shuffle(questions).slice(0,mode==='meaning'?10:15),idx:0,score:0,answered:false,selected:null};
+  connectorSession={items:shuffle(questions),idx:0,score:0,answered:false,selected:null};
   prepareConnector();render();
 }
 function prepareConnector(){
@@ -4828,10 +4853,12 @@ function answerConnector(i){
   const item=s.items[s.idx],ok=s.options[i]===s.answer;
   s.answered=true;s.selected=i;if(ok)s.score++;
   const r=connectorHistory[item.c.id]||(connectorHistory[item.c.id]={unlocked:false,wrong:0,correct:0});
-  if(ok){r.correct++;if(item.mode==='meaning')r.unlocked=true;}else{
-    r.wrong++;
-    // Repeat the missed item later in this session.
-    s.items.push(item);
+  const p=connectorQuestions[item.key]||(connectorQuestions[item.key]={solved:false,needsReview:false,wrong:0,correct:0});
+  if(ok){
+    r.correct++;p.correct++;p.solved=true;p.needsReview=false;
+    if(item.mode==='meaning')r.unlocked=true;
+  }else{
+    r.wrong++;p.wrong++;p.solved=false;p.needsReview=true;s.items.push(item);
   }
   saveConnectors();render();
 }
@@ -4839,20 +4866,43 @@ function nextConnector(){
   const s=connectorSession;if(!s||!s.answered)return;
   s.idx++;if(s.idx<s.items.length)prepareConnector();render();
 }
+function connectorOverview(){
+  const learned=CONNECTORS.filter(c=>connectorHistory[c.id]?.unlocked);
+  const mistakes=connectorItems.filter(item=>connectorQuestions[item.key]?.wrong>0);
+  const unresolved=mistakes.filter(item=>connectorQuestions[item.key]?.needsReview);
+  const solved=connectorItems.filter(item=>item.mode==='cloze'&&connectorQuestions[item.key]?.solved).length;
+  const ready=allConnectorMeaningsLearned();
+  let html='<div class="teach-header"><h2>Edat, Cümle Zarfı & Bağlaç</h2><p>'+learned.length+' / '+CONNECTORS.length+' anlam öğrenildi · '+solved+' / 100 cümle tamamlandı</p></div>'+
+    '<div class="tabs">'+[['practice','Çalış'],['learned','Öğrendiklerim ('+learned.length+')'],['mistakes','Yanlışlarım ('+unresolved.length+')']].map(([view,label])=>
+      '<button class="tab '+(connectorView===view?'active':'')+'" onclick="connectorHome(\''+view+'\')">'+label+'</button>').join('')+'</div>'+
+    (connectorSaveFailed?'<p class="screen-note" role="alert">İlerleme kaydedilemedi. Tarayıcı depolama ayarlarını kontrol et.</p>':'');
+  if(connectorView==='learned'){
+    html+='<p class="screen-note">Öğrendiğin anlamlar bu tarayıcıda kaydedilir. Yeni anlam testlerinde tekrar sorulmaz; istersen buradan tekrar çalışabilirsin.</p>'+
+      (learned.length?'<button class="btn-full" onclick="startConnectors(\'meaning\',0,true)">Öğrendiklerimi Tekrarla</button>':'<p class="screen-note">Doğru bildiğin anlamlar burada görünecek.</p>')+
+      learned.map(c=>'<div class="list-item"><span><span class="list-word">'+escapeHTML(c.word)+'</span><br><small>'+escapeHTML(c.group)+'</small></span><span class="list-tr">'+escapeHTML(c.meaning)+'</span></div>').join('');
+  }else if(connectorView==='mistakes'){
+    html+='<p class="screen-note">Yanlışların saklanır. Yeniden doğru cevapladığında “Düzeltildi” olarak işaretlenir.</p>'+
+      (unresolved.length?'<button class="btn-full" onclick="startConnectorMistakes()">Yanlışlarımı Çalış</button>':'')+
+      (mistakes.length?mistakes.map(({c,q,key,mode})=>'<details class="mistake-card"><summary>'+escapeHTML(c.word)+' · '+(mode==='meaning'?'Anlam':'Boşluk doldurma')+
+        '<span>'+connectorQuestions[key].wrong+' yanlış · '+(connectorQuestions[key].needsReview?'Tekrar gerekiyor':'Düzeltildi')+'</span></summary><div class="mistake-body"><p class="teach-tr">'+escapeHTML(c.meaning)+'</p><p class="teach-tip">'+escapeHTML(c.tip)+'</p><p class="teach-example-en">'+escapeHTML((q||c.questions[0]).sentence.replace('_____', (q||c.questions[0]).answer))+'</p><p class="teach-example-tr">'+escapeHTML((q||c.questions[0]).translation)+'</p></div></details>').join(''):'<p class="screen-note">Henüz yanlış cevabın yok.</p>');
+  }else{
+    html+='<p class="screen-note">Önce 20 ifadenin tamamının anlamını öğren. Ardından 100 boşluk doldurma sorusu açılır. Her cevabın anında kaydedilir; kaldığın yerden devam edersin. Yanlışlar tur sonunda tekrar sorulur.</p>'+
+      (!ready?'<button class="btn-full" onclick="startConnectors(\'meaning\')">Kalan Anlamları Çalış ('+(CONNECTORS.length-learned.length)+')</button>':'<p class="teach-tr">Tüm anlamları öğrendin. Boşluk doldurma açık!</p>')+
+      [1,2,3].map(t=>{
+        const pool=CONNECTORS.filter(c=>c.tier===t),remaining=pool.filter(c=>!connectorHistory[c.id]?.unlocked).length;
+        const left=connectorItems.filter(item=>item.mode==='cloze'&&item.c.tier===t&&!connectorQuestions[item.key]?.solved).length;
+        return '<div class="teach-card"><h3>'+['','1 · Sık karşılaşılanlar','2 · Orta düzey','3 · İleri / daha az karşılaşılanlar'][t]+'</h3>'+
+          '<p class="screen-note">'+(pool.length-remaining)+' / '+pool.length+' anlam öğrenildi · '+(pool.length*5-left)+' / '+pool.length*5+' cümle tamamlandı</p>'+
+          '<button class="btn-full" '+(!remaining?'disabled':'')+' onclick="startConnectors(\'meaning\','+t+')">Kalan Anlamlar ('+remaining+')</button>'+
+          '<button class="btn-full secondary" '+(!ready||!left?'disabled':'')+' onclick="startConnectors(\'cloze\','+t+')">Kalan Boşluk Soruları ('+left+')</button>'+
+          (ready&&!left?'<button class="btn-full secondary" onclick="startConnectors(\'cloze\','+t+',true)">Tamamlanan Cümleleri Tekrarla</button>':'')+'</div>';
+      }).join('');
+  }
+  return html;
+}
 function renderConnectors(app){
   const s=connectorSession;
-  if(!s){
-    app.innerHTML='<div class="teach-header"><h2>Edat, Cümle Zarfı & Bağlaç</h2><p>Önce anlamı öğren, sonra cümlede uygula.</p></div>'+
-      '<p class="screen-note">20 kelime · 100 farklı boşluk sorusu. B1–B2 ağırlıklı; az sayıda A2 ve C1. Seviyeler çalışma amacıyla yaklaşık belirlenmiştir. Doğru bildiğin anlam, o kelimenin 5 cümlesini açar. Yanlışlar oturum sonunda tekrar sorulur.</p>'+
-      [1,2,3].map(t=>{
-        const pool=CONNECTORS.filter(c=>c.tier===t),open=pool.filter(c=>connectorHistory[c.id]?.unlocked).length;
-        return '<div class="teach-card"><h3>'+['','1 · Sık karşılaşılanlar','2 · Orta düzey','3 · İleri / daha az karşılaşılanlar'][t]+'</h3>'+
-          '<p class="screen-note">'+open+' / '+pool.length+' kelimenin boşluk soruları açık</p>'+
-          '<button class="btn-full" onclick="startConnectors(\'meaning\','+t+')">Anlam Testi</button>'+
-          '<button class="btn-full secondary" '+(!open?'disabled':'')+' onclick="startConnectors(\'cloze\','+t+')">Boşluk Doldur ('+(open*5)+' soru)</button>'+
-          '<p class="screen-note">'+pool.map(c=>escapeHTML(c.word)+(connectorHistory[c.id]?.unlocked?' ✓':'')).join(' · ')+'</p></div>';
-      }).join('');return;
-  }
+  if(!s){app.innerHTML=connectorOverview();return;}
   if(s.idx>=s.items.length){
     app.innerHTML='<div class="result-card"><div class="result-title">Tur tamamlandı!</div><p class="screen-note">'+s.score+' / '+s.items.length+' doğru · Tekrar cevapları dahil.</p><button class="btn-full" onclick="connectorHome()">Bölümlere Dön</button></div>';return;
   }
@@ -4870,7 +4920,7 @@ function renderConnectors(app){
     (s.answered?'<div class="teach-card"><div class="teach-tr">'+escapeHTML(c.word)+' — '+escapeHTML(c.meaning)+'</div>'+
       '<p class="teach-tip">'+escapeHTML(c.tip)+'</p><p class="teach-example-en" lang="en">'+escapeHTML((q||c.questions[0]).sentence.replace('_____', (q||c.questions[0]).answer))+'</p>'+
       (s.options[s.selected]!==s.answer?'<p class="teach-example-tr" lang="tr"><strong>Türkçe:</strong> '+escapeHTML((q||c.questions[0]).translation)+'</p>':'')+
-      '<p class="screen-note">'+(s.options[s.selected]===s.answer?(mode==='meaning'?'Bu kelimenin boşluk soruları açıldı.':'Doğru kullanım!'):'Bu soru turun sonunda yeniden gelecek.')+'</p></div>'+
+      '<p class="screen-note">'+(s.options[s.selected]===s.answer?(mode==='meaning'?'Bu anlam Öğrendiklerim’e kaydedildi.':'Doğru kullanım!'):'Bu soru turun sonunda yeniden gelecek.')+'</p></div>'+
       '<button class="next-btn" onclick="nextConnector()">Devam Et →</button>':'');
 }
 const renderBeforeConnectors=render;
