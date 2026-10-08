@@ -4778,6 +4778,825 @@ const CONNECTORS = [["because","Bağlaç","çünkü",1,"Ardından özne + fiil g
     return {sentence,answer,translation:CONNECTOR_TRANSLATIONS[r[0]][j],others:others.split(','),level:r[3]===3?'C1':i<5&&j===0?'A2':j%2?'B1':'B2'};
   })
 }));
+// Extra five-choice questions: B1-weighted practice for tiers 1 and 2.
+const CONNECTOR_EXTRA_QUESTIONS = [
+  {
+    "word": "because",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "I stayed at home _____ I had a fever.",
+        "translation": "Ateşim olduğu için evde kaldım.",
+        "answer": "because",
+        "others": [
+          "because of",
+          "despite",
+          "therefore",
+          "during"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "The shop closed early _____ there were no customers.",
+        "translation": "Hiç müşteri olmadığı için dükkân erken kapandı.",
+        "answer": "because",
+        "others": [
+          "because of",
+          "despite",
+          "therefore",
+          "during"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "We chose this bank _____ its fees were lower.",
+        "translation": "Ücretleri daha düşük olduğu için bu bankayı seçtik.",
+        "answer": "because",
+        "others": [
+          "because of",
+          "despite",
+          "therefore",
+          "during"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "because of",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "The outdoor concert was cancelled _____ the storm.",
+        "translation": "Açık hava konseri fırtına nedeniyle iptal edildi.",
+        "answer": "because of",
+        "others": [
+          "because",
+          "although",
+          "however",
+          "so that"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "The road was closed _____ an accident.",
+        "translation": "Yol bir kaza nedeniyle kapatıldı.",
+        "answer": "because of",
+        "others": [
+          "because",
+          "although",
+          "however",
+          "so that"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "He could not hear the speaker _____ the noise.",
+        "translation": "Gürültü nedeniyle konuşmacıyı duyamadı.",
+        "answer": "because of",
+        "others": [
+          "because",
+          "although",
+          "however",
+          "so that"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "although",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "_____ the room was small, it was comfortable.",
+        "translation": "Oda küçük olmasına rağmen rahattı.",
+        "answer": "Although",
+        "others": [
+          "Despite",
+          "Because of",
+          "During",
+          "Therefore"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "_____ she was tired, she finished her homework.",
+        "translation": "Yorgun olmasına rağmen ödevini bitirdi.",
+        "answer": "Although",
+        "others": [
+          "Despite",
+          "Because of",
+          "During",
+          "Therefore"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "_____ the tickets were expensive, the concert sold out.",
+        "translation": "Biletler pahalı olmasına rağmen konserin bütün biletleri satıldı.",
+        "answer": "Although",
+        "others": [
+          "Despite",
+          "Because of",
+          "During",
+          "Therefore"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "despite",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "She passed the exam _____ having very little time to study.",
+        "translation": "Çalışmak için çok az zamanı olmasına rağmen sınavı geçti.",
+        "answer": "despite",
+        "others": [
+          "although",
+          "because",
+          "however",
+          "so that"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "The team won _____ the absence of its best player.",
+        "translation": "En iyi oyuncusunun yokluğuna rağmen takım kazandı.",
+        "answer": "despite",
+        "others": [
+          "although",
+          "because",
+          "however",
+          "so that"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "He kept smiling _____ the bad news.",
+        "translation": "Kötü haberlere rağmen gülümsemeye devam etti.",
+        "answer": "despite",
+        "others": [
+          "although",
+          "because",
+          "however",
+          "so that"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "however",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "The hotel was clean; _____, the beds were uncomfortable.",
+        "translation": "Otel temizdi; ancak yataklar rahatsızdı.",
+        "answer": "however",
+        "others": [
+          "therefore",
+          "moreover",
+          "for example",
+          "so"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "She studied hard. _____, she did not pass the exam.",
+        "translation": "Çok çalıştı. Ancak sınavı geçemedi.",
+        "answer": "However",
+        "others": [
+          "Therefore",
+          "Moreover",
+          "For example",
+          "So"
+        ]
+      },
+      {
+        "level": "B2",
+        "sentence": "The software offers useful features; _____, it is incompatible with our existing system.",
+        "translation": "Yazılım yararlı özellikler sunuyor; ancak mevcut sistemimizle uyumlu değil.",
+        "answer": "however",
+        "others": [
+          "therefore",
+          "moreover",
+          "for example",
+          "so"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "therefore",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "The last bus had left; _____, we took a taxi.",
+        "translation": "Son otobüs gitmişti; bu nedenle taksiye bindik.",
+        "answer": "therefore",
+        "others": [
+          "however",
+          "moreover",
+          "for example",
+          "so"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "The water is unsafe to drink. _____, it must be boiled first.",
+        "translation": "Su içmek için güvenli değil. Bu nedenle önce kaynatılmalı.",
+        "answer": "Therefore",
+        "others": [
+          "However",
+          "Moreover",
+          "For example",
+          "So"
+        ]
+      },
+      {
+        "level": "B2",
+        "sentence": "The supplier failed to meet the deadline; _____, production had to be postponed.",
+        "translation": "Tedarikçi son teslim tarihine yetişemedi; bu nedenle üretimin ertelenmesi gerekti.",
+        "answer": "therefore",
+        "others": [
+          "however",
+          "moreover",
+          "for example",
+          "so"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "unless",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "You will miss the train _____ you leave now.",
+        "translation": "Şimdi yola çıkmazsan treni kaçıracaksın.",
+        "answer": "unless",
+        "others": [
+          "because",
+          "although",
+          "whereas",
+          "despite"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "You cannot borrow these books _____ you have a library card.",
+        "translation": "Kütüphane kartın olmadıkça bu kitapları ödünç alamazsın.",
+        "answer": "unless",
+        "others": [
+          "because",
+          "although",
+          "whereas",
+          "despite"
+        ]
+      },
+      {
+        "level": "B2",
+        "sentence": "The agreement will expire _____ both parties request an extension.",
+        "translation": "Her iki taraf da uzatma talep etmedikçe anlaşmanın süresi dolacak.",
+        "answer": "unless",
+        "others": [
+          "because",
+          "although",
+          "whereas",
+          "despite"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "while",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "I washed the dishes _____ my brother was drying them.",
+        "translation": "Kardeşim bulaşıkları kurularken ben onları yıkadım.",
+        "answer": "while",
+        "others": [
+          "during",
+          "despite",
+          "because of",
+          "therefore"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "She listened to music _____ she was cleaning her room.",
+        "translation": "Odasını temizlerken müzik dinledi.",
+        "answer": "while",
+        "others": [
+          "during",
+          "despite",
+          "because of",
+          "therefore"
+        ]
+      },
+      {
+        "level": "B2",
+        "sentence": "The technician detected a fault _____ she was inspecting the control panel.",
+        "translation": "Teknisyen kontrol panelini incelerken bir arıza tespit etti.",
+        "answer": "while",
+        "others": [
+          "during",
+          "despite",
+          "because of",
+          "therefore"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "during",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "Please keep your phone silent _____ the lesson.",
+        "translation": "Lütfen ders sırasında telefonunu sessizde tut.",
+        "answer": "during",
+        "others": [
+          "while",
+          "although",
+          "because",
+          "so that"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "We met several new people _____ our holiday.",
+        "translation": "Tatilimiz sırasında birkaç yeni insanla tanıştık.",
+        "answer": "during",
+        "others": [
+          "while",
+          "although",
+          "because",
+          "so that"
+        ]
+      },
+      {
+        "level": "C1",
+        "sentence": "Several discrepancies were identified _____ the independent audit of the institution's accounts.",
+        "translation": "Kurumun hesaplarının bağımsız denetimi sırasında birkaç tutarsızlık tespit edildi.",
+        "answer": "during",
+        "others": [
+          "while",
+          "although",
+          "because",
+          "so that"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "before",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "Save your work _____ you turn off the computer.",
+        "translation": "Bilgisayarı kapatmadan önce çalışmanı kaydet.",
+        "answer": "before",
+        "others": [
+          "despite",
+          "during",
+          "because of",
+          "therefore"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "Wash your hands _____ you prepare the food.",
+        "translation": "Yemeği hazırlamadan önce ellerini yıka.",
+        "answer": "before",
+        "others": [
+          "despite",
+          "during",
+          "because of",
+          "therefore"
+        ]
+      },
+      {
+        "level": "C1",
+        "sentence": "Verify the authenticity of the supporting documents _____ you authorize the transfer of funds.",
+        "translation": "Para transferine izin vermeden önce destekleyici belgelerin gerçekliğini doğrula.",
+        "answer": "before",
+        "others": [
+          "despite",
+          "during",
+          "because of",
+          "therefore"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "whereas",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "My sister prefers tea, _____ I prefer coffee.",
+        "translation": "Kız kardeşim çayı tercih eder, oysa ben kahveyi tercih ederim.",
+        "answer": "whereas",
+        "others": [
+          "despite",
+          "during",
+          "moreover",
+          "however"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "This bag is made of leather, _____ that one is made of cotton.",
+        "translation": "Bu çanta deriden yapılmış, oysa diğeri pamuktan yapılmış.",
+        "answer": "whereas",
+        "others": [
+          "despite",
+          "during",
+          "moreover",
+          "however"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "Tom travels to work by bus, _____ Lisa walks.",
+        "translation": "Tom işe otobüsle gider, oysa Lisa yürür.",
+        "answer": "whereas",
+        "others": [
+          "despite",
+          "during",
+          "moreover",
+          "however"
+        ]
+      },
+      {
+        "level": "B2",
+        "sentence": "The first report focuses on costs, _____ the second examines environmental impacts.",
+        "translation": "İlk rapor maliyetlere odaklanır, oysa ikinci rapor çevresel etkileri inceler.",
+        "answer": "whereas",
+        "others": [
+          "despite",
+          "during",
+          "moreover",
+          "however"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "nevertheless",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "It was very cold; _____, they went swimming.",
+        "translation": "Hava çok soğuktu; yine de yüzmeye gittiler.",
+        "answer": "nevertheless",
+        "others": [
+          "therefore",
+          "moreover",
+          "for example",
+          "so"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "The journey was long. _____, we enjoyed every minute.",
+        "translation": "Yolculuk uzundu. Yine de her dakikasından keyif aldık.",
+        "answer": "Nevertheless",
+        "others": [
+          "Therefore",
+          "Moreover",
+          "For example",
+          "So"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "He had little experience; _____, he did the job well.",
+        "translation": "Deneyimi azdı; yine de işi iyi yaptı.",
+        "answer": "nevertheless",
+        "others": [
+          "therefore",
+          "moreover",
+          "for example",
+          "so"
+        ]
+      },
+      {
+        "level": "B2",
+        "sentence": "The initial results were disappointing; _____, the researchers continued the study.",
+        "translation": "İlk sonuçlar hayal kırıklığı yaratıyordu; yine de araştırmacılar çalışmaya devam etti.",
+        "answer": "nevertheless",
+        "others": [
+          "therefore",
+          "moreover",
+          "for example",
+          "so"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "moreover",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "The flat is close to my office. _____, the rent is low.",
+        "translation": "Daire ofisime yakın. Ayrıca kirası düşük.",
+        "answer": "Moreover",
+        "others": [
+          "However",
+          "Nevertheless",
+          "In contrast",
+          "But"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "The course is free; _____, all the materials are included.",
+        "translation": "Kurs ücretsiz; ayrıca bütün materyaller de dahil.",
+        "answer": "moreover",
+        "others": [
+          "however",
+          "nevertheless",
+          "in contrast",
+          "but"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "The bus is cheap. _____, it stops right outside the school.",
+        "translation": "Otobüs ucuz. Ayrıca okulun hemen önünde duruyor.",
+        "answer": "Moreover",
+        "others": [
+          "However",
+          "Nevertheless",
+          "In contrast",
+          "But"
+        ]
+      },
+      {
+        "level": "B2",
+        "sentence": "The new procedure reduces errors; _____, it allows staff to process applications faster.",
+        "translation": "Yeni yöntem hataları azaltır; ayrıca personelin başvuruları daha hızlı işlemesine olanak sağlar.",
+        "answer": "moreover",
+        "others": [
+          "however",
+          "nevertheless",
+          "in contrast",
+          "but"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "otherwise",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "Hurry up; _____, we will be late.",
+        "translation": "Acele et; aksi takdirde geç kalacağız.",
+        "answer": "otherwise",
+        "others": [
+          "moreover",
+          "for example",
+          "similarly",
+          "and"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "Take an umbrella; _____, you may get wet.",
+        "translation": "Şemsiye al; aksi takdirde ıslanabilirsin.",
+        "answer": "otherwise",
+        "others": [
+          "moreover",
+          "for example",
+          "similarly",
+          "and"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "Write down the address; _____, you might forget it.",
+        "translation": "Adresi yaz; aksi takdirde onu unutabilirsin.",
+        "answer": "otherwise",
+        "others": [
+          "moreover",
+          "for example",
+          "similarly",
+          "and"
+        ]
+      },
+      {
+        "level": "B2",
+        "sentence": "Renew your licence before it expires; _____, you will no longer be allowed to operate the equipment.",
+        "translation": "Ruhsatını süresi dolmadan yenile; aksi takdirde ekipmanı kullanmana artık izin verilmeyecek.",
+        "answer": "otherwise",
+        "others": [
+          "moreover",
+          "for example",
+          "similarly",
+          "and"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "provided that",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "You can use my bike _____ you bring it back tonight.",
+        "translation": "Bu gece geri getirmen şartıyla bisikletimi kullanabilirsin.",
+        "answer": "provided that",
+        "others": [
+          "despite",
+          "because of",
+          "during",
+          "otherwise"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "We can have a picnic _____ the weather stays dry.",
+        "translation": "Hava yağışsız kalırsa piknik yapabiliriz.",
+        "answer": "provided that",
+        "others": [
+          "despite",
+          "because of",
+          "during",
+          "otherwise"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "You may leave early _____ you finish your work first.",
+        "translation": "Önce işini bitirmen şartıyla erken çıkabilirsin.",
+        "answer": "provided that",
+        "others": [
+          "despite",
+          "because of",
+          "during",
+          "otherwise"
+        ]
+      },
+      {
+        "level": "B2",
+        "sentence": "The supplier will offer a discount _____ we place an order of at least one hundred units.",
+        "translation": "En az yüz adet sipariş vermemiz şartıyla tedarikçi indirim sunacak.",
+        "answer": "provided that",
+        "others": [
+          "despite",
+          "because of",
+          "during",
+          "otherwise"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "owing to",
+    "questions": [
+      {
+        "level": "B1",
+        "sentence": "The school was closed _____ heavy snow.",
+        "translation": "Okul yoğun kar nedeniyle kapatıldı.",
+        "answer": "owing to",
+        "others": [
+          "although",
+          "because",
+          "however",
+          "so that"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "The match started late _____ a power failure.",
+        "translation": "Maç elektrik kesintisi nedeniyle geç başladı.",
+        "answer": "owing to",
+        "others": [
+          "although",
+          "because",
+          "however",
+          "so that"
+        ]
+      },
+      {
+        "level": "B1",
+        "sentence": "The restaurant lost customers _____ poor service.",
+        "translation": "Restoran kötü hizmet nedeniyle müşteri kaybetti.",
+        "answer": "owing to",
+        "others": [
+          "although",
+          "because",
+          "however",
+          "so that"
+        ]
+      },
+      {
+        "level": "B2",
+        "sentence": "The company revised its forecast _____ an unexpected decline in overseas demand.",
+        "translation": "Şirket yurt dışı talepte beklenmedik bir düşüş nedeniyle tahminini değiştirdi.",
+        "answer": "owing to",
+        "others": [
+          "although",
+          "because",
+          "however",
+          "so that"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "in spite of",
+    "questions": [
+      {
+        "level": "B2",
+        "sentence": "The negotiations continued _____ repeated disagreements over the payment terms.",
+        "translation": "Ödeme koşulları üzerindeki tekrarlanan anlaşmazlıklara rağmen müzakereler devam etti.",
+        "answer": "in spite of",
+        "others": [
+          "although",
+          "because",
+          "however",
+          "so that"
+        ]
+      },
+      {
+        "level": "C1",
+        "sentence": "The policy remained in force _____ being challenged on constitutional grounds.",
+        "translation": "Anayasal gerekçelerle itiraz edilmesine rağmen politika yürürlükte kaldı.",
+        "answer": "in spite of",
+        "others": [
+          "although",
+          "because",
+          "however",
+          "so that"
+        ]
+      },
+      {
+        "level": "C1",
+        "sentence": "The committee endorsed the proposal _____ reservations expressed by several independent advisers.",
+        "translation": "Birkaç bağımsız danışmanın dile getirdiği çekincelere rağmen komite teklifi destekledi.",
+        "answer": "in spite of",
+        "others": [
+          "although",
+          "because",
+          "however",
+          "so that"
+        ]
+      }
+    ]
+  },
+  {
+    "word": "so that",
+    "questions": [
+      {
+        "level": "B2",
+        "sentence": "We introduced online appointments _____ customers could avoid long queues.",
+        "translation": "Müşterilerin uzun kuyruklardan kaçınabilmesi için çevrim içi randevuları kullanıma sunduk.",
+        "answer": "so that",
+        "others": [
+          "despite",
+          "because of",
+          "during",
+          "moreover"
+        ]
+      },
+      {
+        "level": "C1",
+        "sentence": "The researchers anonymised the records _____ participants could not be identified from the published findings.",
+        "translation": "Katılımcıların yayımlanan bulgulardan kimliğinin belirlenememesi için araştırmacılar kayıtları anonimleştirdi.",
+        "answer": "so that",
+        "others": [
+          "despite",
+          "because of",
+          "during",
+          "moreover"
+        ]
+      },
+      {
+        "level": "C1",
+        "sentence": "The institution established an independent review mechanism _____ potential conflicts of interest could be detected at an early stage.",
+        "translation": "Olası çıkar çatışmalarının erken aşamada tespit edilebilmesi için kurum bağımsız bir inceleme mekanizması kurdu.",
+        "answer": "so that",
+        "others": [
+          "despite",
+          "because of",
+          "during",
+          "moreover"
+        ]
+      }
+    ]
+  }
+];
+for (const extra of CONNECTOR_EXTRA_QUESTIONS) {
+  const connector = CONNECTORS.find(c => c.word === extra.word);
+  connector.questions.push(...extra.questions);
+}
+const connectorClozeTotal = CONNECTORS.reduce((total, c) => total + c.questions.length, 0);
+
 let connectorHistory={};
 try {
   const saved=JSON.parse(localStorage.getItem('kl_connectors_v1')||'{}');
@@ -4872,7 +5691,7 @@ function connectorOverview(){
   const unresolved=mistakes.filter(item=>connectorQuestions[item.key]?.needsReview);
   const solved=connectorItems.filter(item=>item.mode==='cloze'&&connectorQuestions[item.key]?.solved).length;
   const ready=allConnectorMeaningsLearned();
-  let html='<div class="teach-header"><h2>Edat, Cümle Zarfı & Bağlaç</h2><p>'+learned.length+' / '+CONNECTORS.length+' anlam öğrenildi · '+solved+' / 100 cümle tamamlandı</p></div>'+
+  let html='<div class="teach-header"><h2>Edat, Cümle Zarfı & Bağlaç</h2><p>'+learned.length+' / '+CONNECTORS.length+' anlam öğrenildi · '+solved+' / '+connectorClozeTotal+' cümle tamamlandı</p></div>'+
     '<div class="tabs">'+[['practice','Çalış'],['learned','Öğrendiklerim ('+learned.length+')'],['mistakes','Yanlışlarım ('+unresolved.length+')']].map(([view,label])=>
       '<button class="tab '+(connectorView===view?'active':'')+'" onclick="connectorHome(\''+view+'\')">'+label+'</button>').join('')+'</div>'+
     (connectorSaveFailed?'<p class="screen-note" role="alert">İlerleme kaydedilemedi. Tarayıcı depolama ayarlarını kontrol et.</p>':'');
@@ -4886,13 +5705,14 @@ function connectorOverview(){
       (mistakes.length?mistakes.map(({c,q,key,mode})=>'<details class="mistake-card"><summary>'+escapeHTML(c.word)+' · '+(mode==='meaning'?'Anlam':'Boşluk doldurma')+
         '<span>'+connectorQuestions[key].wrong+' yanlış · '+(connectorQuestions[key].needsReview?'Tekrar gerekiyor':'Düzeltildi')+'</span></summary><div class="mistake-body"><p class="teach-tr">'+escapeHTML(c.meaning)+'</p><p class="teach-tip">'+escapeHTML(c.tip)+'</p><p class="teach-example-en">'+escapeHTML((q||c.questions[0]).sentence.replace('_____', (q||c.questions[0]).answer))+'</p><p class="teach-example-tr">'+escapeHTML((q||c.questions[0]).translation)+'</p></div></details>').join(''):'<p class="screen-note">Henüz yanlış cevabın yok.</p>');
   }else{
-    html+='<p class="screen-note">Önce 20 ifadenin tamamının anlamını öğren. Ardından 100 boşluk doldurma sorusu açılır. Her cevabın anında kaydedilir; kaldığın yerden devam edersin. Yanlışlar tur sonunda tekrar sorulur.</p>'+
+    html+='<p class="screen-note">Önce 20 ifadenin tamamının anlamını öğren. Ardından '+connectorClozeTotal+' boşluk doldurma sorusu açılır. Her cevabın anında kaydedilir; kaldığın yerden devam edersin. Yanlışlar tur sonunda tekrar sorulur.</p>'+
       (!ready?'<button class="btn-full" onclick="startConnectors(\'meaning\')">Kalan Anlamları Çalış ('+(CONNECTORS.length-learned.length)+')</button>':'<p class="teach-tr">Tüm anlamları öğrendin. Boşluk doldurma açık!</p>')+
       [1,2,3].map(t=>{
         const pool=CONNECTORS.filter(c=>c.tier===t),remaining=pool.filter(c=>!connectorHistory[c.id]?.unlocked).length;
+        const total=pool.reduce((sum,c)=>sum+c.questions.length,0);
         const left=connectorItems.filter(item=>item.mode==='cloze'&&item.c.tier===t&&!connectorQuestions[item.key]?.solved).length;
         return '<div class="teach-card"><h3>'+['','1 · Sık karşılaşılanlar','2 · Orta düzey','3 · İleri / daha az karşılaşılanlar'][t]+'</h3>'+
-          '<p class="screen-note">'+(pool.length-remaining)+' / '+pool.length+' anlam öğrenildi · '+(pool.length*5-left)+' / '+pool.length*5+' cümle tamamlandı</p>'+
+          '<p class="screen-note">'+(pool.length-remaining)+' / '+pool.length+' anlam öğrenildi · '+(total-left)+' / '+total+' cümle tamamlandı</p>'+
           '<button class="btn-full" '+(!remaining?'disabled':'')+' onclick="startConnectors(\'meaning\','+t+')">Kalan Anlamlar ('+remaining+')</button>'+
           '<button class="btn-full secondary" '+(!ready||!left?'disabled':'')+' onclick="startConnectors(\'cloze\','+t+')">Kalan Boşluk Soruları ('+left+')</button>'+
           (ready&&!left?'<button class="btn-full secondary" onclick="startConnectors(\'cloze\','+t+',true)">Tamamlanan Cümleleri Tekrarla</button>':'')+'</div>';
